@@ -1,0 +1,349 @@
+<!DOCTYPE html><html class="h-full stitch-anim-fade-in" lang="zh-CN" data-ready="false"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>蟑螂强 · conversion</title>
+<!-- Tailwind CSS v3 with Plugins -->
+
+<!-- Google Fonts Inter & Plus Jakarta Sans / Noto Sans SC -->
+
+
+
+
+<!-- BEGIN: Custom Styles -->
+<style data-purpose="base-styling">
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      user-select: none;
+    }
+    /* Sleek rounded scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d8dde6;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #b9c1cf;
+    }
+  </style>
+<!-- END: Custom Styles -->
+<link rel="stylesheet" href="conversion.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><script src="theme.js"></script><script defer="" src="app.js"></script></head>
+<body class="desktop-body" style="" data-page="conversion">
+<!-- BEGIN: Floating Outer Shell -->
+<div id="window-bar"><span class="window-drag"><img class="titlebar-logo" src="assets/app-icon.ico" alt=""><span>蟑螂强</span></span><button data-action="minimize" title="最小化">−</button><button data-action="maximize" title="最大化">□</button><button data-action="close" title="关闭">×</button></div><div class="w-full h-full flex gap-5 items-stretch overflow-hidden" id="desktop-shell">
+<!-- BEGIN: Left Sidebar Capsule (Reference Style) -->
+<aside class="w-64 bg-[#212327] text-white rounded-[28px] p-5 shadow-floating-sidebar flex flex-col justify-between shrink-0 select-none" id="global-sidebar">
+<div class="space-y-6">
+<!-- Brand Header -->
+<div class="flex items-center space-x-3 px-2 pt-1">
+<img class="brand-companion" src="assets/brand-companion.jpg" alt="蟑螂强副图">
+<div>
+<h2 class="text-sm font-bold tracking-tight text-white leading-tight">蟑螂强</h2>
+<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.4</p>
+</div>
+</div>
+<!-- Unified 6-item Navigation -->
+<nav aria-label="侧边主导航" class="space-y-1.5 pt-2">
+<!-- 1. 格式与尺寸转换 -->
+<button class="nav-item" title="格式与尺寸转换" data-action="conversion" aria-current="page">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<rect height="18" rx="2" stroke-linecap="round" stroke-linejoin="round" width="18" x="3" y="3"></rect>
+<circle cx="8.5" cy="8.5" r="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+<path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">格式与尺寸转换</span>
+</button>
+<!-- 2. 图片清晰度增强 -->
+<button class="nav-item" title="图片清晰度增强" data-action="clarity">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 2v4m0 12v4M4 12H2m20 0h-2m-2.93-7.07l-2.83 2.83m-8.48 8.48l-2.83 2.83m0-14.14l2.83 2.83m8.48 8.48l2.83 2.83" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+</svg>
+</div>
+<span class="truncate">图片清晰度增强</span>
+</button>
+<!-- 3. 文件夹自动整理 -->
+<button class="nav-item" title="文件夹自动整理" data-action="organizer">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">文件夹自动整理</span>
+</button>
+<!-- 4. 图片转链接 -->
+<button class="nav-item" title="图片转链接" data-action="imageLink">
+<div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 14a5 5 0 007.07 0l2-2a5 5 0 00-7.07-7.07l-1.15 1.15M14 10a5 5 0 00-7.07 0l-2 2A5 5 0 0012 19.07l1.15-1.15" stroke-linecap="round"></path></svg></div>
+<span class="truncate">图片转链接</span>
+</button>
+<button class="nav-item" title="本地内容搜索" data-action="localSearch">
+<div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4M8 11h6M11 8v6" stroke-linecap="round"></path></svg></div>
+<span class="truncate">本地内容搜索</span>
+</button>
+<!-- 5. 更新日志与版本 -->
+<button class="nav-item" title="更新日志与版本" data-action="changelog">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">更新日志与版本</span>
+</button>
+<!-- 6. 偏好设置 -->
+<button class="nav-item" title="偏好设置" data-action="settings">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+</svg>
+</div>
+<span class="truncate">偏好设置</span>
+</button>
+</nav>
+</div>
+<!-- 底部守护服务状态小卡片 -->
+<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.4</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
+</aside>
+<!-- END: Left Sidebar Capsule -->
+<!-- BEGIN: Main White Content Card -->
+<main class="flex-1 bg-white shadow-floating border border-white/80 flex flex-col min-w-0 overflow-hidden p-6 lg:p-7 rounded-[28px]">
+<!-- Top Header Area: Title & Pill Actions -->
+<header class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-slate-100 shrink-0">
+<div class="flex flex-col sm:flex-row sm:items-center gap-2.5 sm:gap-4">
+<div>
+<div class="flex items-center space-x-2">
+<span class="text-xs font-semibold text-slate-400">蟑螂强</span>
+<span class="text-slate-300 text-xs">/</span>
+<h1 class="text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight">格式与尺寸转换 <span class="text-xs font-mono font-semibold text-slate-400 ml-1">v3.0.4</span></h1>
+
+</div>
+<p class="text-xs text-slate-400 mt-0.5 font-medium">支持图片、PDF、Word、PPT 互转 · 文档按页离线处理</p>
+</div>
+</div>
+<div class="flex items-center space-x-2.5">
+<div class="inline-flex items-center px-3 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/50 text-[11px] text-emerald-600 font-semibold space-x-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="" id="engine-status">本地转换引擎</span>
+</div>
+</div>
+</header>
+<!-- Center Workspace Split: File Table (Left) + Clean Preview Cards (Right) -->
+<div class="flex flex-wrap items-center justify-between gap-3 pt-3 pb-1 shrink-0">
+<div class="flex items-center space-x-2 flex-wrap gap-y-2">
+<button class="inline-flex items-center px-4 py-2 bg-[#ff5e36] hover:bg-[#ff4b1f] text-white rounded-full text-xs font-semibold shadow-coral transition space-x-1.5 active:scale-95" data-action="add">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="">+ 添加文件</span>
+</button>
+<button class="inline-flex items-center px-3.5 py-2 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 rounded-full text-xs font-medium transition active:scale-95" data-action="clear">
+<svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="">清空列表</span>
+</button>
+<button class="inline-flex items-center px-3.5 py-2 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 rounded-full text-xs font-medium transition active:scale-95" data-action="preview">
+<svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="">预览选中</span>
+</button>
+<div class="h-4 w-px bg-slate-200 mx-1"></div>
+<label class="inline-flex items-center space-x-1.5 cursor-pointer text-xs font-medium text-slate-600">
+<input class="w-3.5 h-3.5 text-[#ff5e36] rounded border-slate-300 focus:ring-0" type="checkbox" data-action="checkAll">
+<span class="">全选转换</span>
+</label>
+<button class="text-xs text-slate-400 hover:text-slate-700 transition px-1.5" data-action="invert">反选</button>
+</div>
+<div class="relative">
+<svg class="w-3.5 h-3.5 text-slate-400 absolute left-3.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path></svg>
+<input class="w-64 pl-9 pr-4 py-1.5 text-xs bg-slate-50 border border-slate-200/70 rounded-full focus:bg-white focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-[#ff5e36] transition placeholder-slate-400 text-slate-700" placeholder="输入文件名关键词实时筛选..." type="text" id="search">
+</div>
+</div><div class="flex-1 min-h-0 flex flex-col lg:flex-row gap-5 pt-3 overflow-hidden">
+<!-- LEFT SIDE: File Table Card -->
+<div class="flex-1 min-w-0 min-h-0 flex flex-col bg-[#f8f9fa] rounded-[24px] border border-slate-200/70 p-3.5 overflow-hidden" id="queue-card">
+<!-- Table Top Control Strip -->
+<div class="flex items-center justify-between px-2 pb-2.5 text-xs text-slate-500 font-medium">
+<div class="flex items-center space-x-3">
+<label class="inline-flex items-center space-x-2 cursor-pointer">
+<input class="w-4 h-4 text-[#ff5e36] rounded-md border-slate-300 focus:ring-0 focus:ring-offset-0 transition" type="checkbox" data-action="checkAll">
+<span class="text-xs font-semibold text-slate-700">全选转换</span>
+</label>
+<button class="text-slate-400 hover:text-slate-700 transition" data-action="invert">反选</button>
+</div>
+<span class="text-[11px] font-mono text-slate-400" id="pending-count">等待添加文件</span>
+</div>
+<!-- Table Structure inside Rounded Wrapper -->
+<div class="flex-1 min-h-0 bg-white rounded-[20px] border border-slate-200/60 shadow-card-soft flex flex-col overflow-hidden">
+<!-- Table Header -->
+<div class="grid grid-cols-12 gap-2 px-5 py-2.5 border-b border-slate-100 bg-[#fafbfc] text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+<div class="col-span-1 flex items-center">
+<input class="w-3.5 h-3.5 text-[#ff5e36] rounded border-slate-300 focus:ring-0" type="checkbox" data-action="checkAll">
+</div>
+<div class="col-span-5">文件名</div>
+<div class="col-span-2">原始尺寸</div>
+<div class="col-span-2">大小</div>
+<div class="col-span-2 text-right">状态</div>
+</div>
+<!-- Table Content Rows -->
+<div class="flex-1 overflow-y-auto divide-y divide-slate-100 text-xs" id="queue"></div>
+<!-- Table Footer Stats Pill Strip -->
+<div class="px-5 py-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500"><span id="queue-count">0 个项目</span><span>质量 100 · 以实际输出为准</span></div>
+</div>
+</div>
+<!-- RIGHT SIDE: Dual Comparison Preview Cards (Reference Style) -->
+<div class="w-full lg:w-[420px] xl:w-[460px] shrink-0 flex flex-col bg-[#f8f9fa] rounded-[24px] border border-slate-200/70 p-3.5" id="conversion-preview">
+<!-- Preview Header -->
+<div class="flex items-center justify-between px-2 pb-2.5">
+<div class="flex items-center space-x-2">
+<span class="text-xs font-bold text-slate-800">实时渲染对比</span>
+<span class="text-[10px] font-mono bg-white px-2 py-0.5 rounded-full border border-slate-200 text-slate-500" id="preview-size"></span>
+</div>
+<!-- Zoom Pills -->
+<div class="flex items-center space-x-1.5 bg-white p-1 rounded-full border border-slate-200 shadow-pill">
+<button class="p-1 rounded-full hover:bg-slate-100 text-slate-500" title="自适应窗口" data-action="fit">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path></svg>
+</button>
+<button class="px-2 py-0.5 rounded-full hover:bg-slate-100 text-slate-700 text-[10px] font-bold font-mono" title="100% 比例" data-action="zoom">
+              1:1
+            </button>
+</div>
+</div>
+<!-- Preview Dual Split Cards -->
+<div class="flex-1 flex flex-col justify-between space-y-3">
+<div class="grid grid-cols-2 gap-2.5 flex-1 min-h-[180px]">
+<!-- Original Viewport Card -->
+<div class="bg-white rounded-[20px] border border-slate-200/80 shadow-card-soft p-3 flex flex-col justify-between overflow-hidden relative">
+<div class="flex items-center justify-between text-[11px] pb-1.5">
+<span class="font-bold text-slate-600">原图</span>
+<span class="text-slate-400 font-mono text-[10px]"></span>
+</div>
+<!-- Simulated Canvas -->
+<div class="flex-1 bg-[#f4f5f8] rounded-xl flex items-center justify-center p-2 relative overflow-hidden image-viewport"><img id="original-preview" alt="原图预览"><span class="empty-preview">选择图片查看预览；文档按页转换</span></div>
+</div>
+<!-- Processed Result Card (Orange & Modern) -->
+<div class="bg-white rounded-[20px] border-2 border-[#ff5e36]/30 shadow-card-soft p-3 flex flex-col justify-between overflow-hidden relative ring-4 ring-orange-500/5">
+<div class="flex items-center justify-between text-[11px] pb-1.5">
+<span class="font-bold text-[#ff5e36]">处理后</span>
+<span class="text-orange-600 font-bold font-mono text-[10px]"></span>
+</div>
+<!-- Result Canvas -->
+<div class="flex-1 bg-[conic-gradient(#f1f5f9_90deg,#fff_90deg_180deg,#f1f5f9_180deg_270deg,#fff_270deg)] [background-size:14px_14px] rounded-xl flex items-center justify-center p-2 relative overflow-hidden image-viewport"><img id="result-preview" alt="结果预览"><span class="empty-preview">转换后显示结果</span></div>
+</div>
+</div>
+<!-- Active Info Note Pill -->
+<div class="bg-white rounded-[18px] p-2.5 border border-slate-200/80 shadow-pill flex items-center space-x-2.5">
+<div class="w-7 h-7 rounded-full bg-[#fff2ee] text-[#ff5e36] flex items-center justify-center shrink-0">
+<svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path>
+</svg>
+</div>
+<p class="text-[11px] text-slate-500 leading-snug" id="selection-note">选择图片可预览；PDF、Word、PPT 将按页处理</p>
+</div>
+</div>
+</div>
+</div>
+<!-- BEGIN: Bottom Parameters & Export Control Bar (Reference Style) -->
+<footer class="mt-4 bg-[#f8f9fa] rounded-[24px] border border-slate-200/70 p-3.5 shrink-0 flex flex-col space-y-3">
+<!-- Line 1: Directory Path Row -->
+<div class="flex flex-wrap items-center justify-between gap-3">
+<label class="flex items-center space-x-2 text-xs font-semibold text-slate-700 cursor-pointer">
+<input class="w-4 h-4 text-[#ff5e36] rounded border-slate-300 focus:ring-0" type="checkbox" id="sameFolder">
+<span class="">保存到原图所在文件夹</span>
+</label>
+<div class="flex-1 max-w-2xl flex items-center relative">
+<input class="w-full bg-white border border-slate-200/90 rounded-full px-4 py-1.5 text-xs text-slate-700 font-mono focus:border-[#ff5e36] focus:ring-2 focus:ring-orange-500/20 outline-none shadow-pill pr-20" type="text" value="" id="output-path" readonly="readonly">
+<button class="absolute right-1 px-3 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-full text-[11px] font-semibold transition border border-slate-200/60" data-action="browse">
+            浏览...
+          </button>
+</div>
+</div>
+<!-- Line 2: Conversion Details (Format, Dimensions, Color Fill) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center text-xs">
+<!-- Output Format -->
+<div class="md:col-span-4 flex items-center space-x-2">
+<label class="text-slate-500 font-semibold shrink-0">输出格式:</label>
+<select class="flex-1 bg-white border border-slate-200 rounded-full px-3 py-1 text-xs text-slate-800 font-medium shadow-pill focus:ring-orange-500 focus:border-[#ff5e36]" id="format"><option value="jpg">JPG 图像</option><option value="png">PNG 图像</option><option value="webp">WebP 图像</option><option value="source">原格式</option><option value="pdf">PDF 文档</option><option value="docx">Word 文档 (.docx)</option><option value="pptx">PowerPoint (.pptx)</option></select>
+</div>
+<!-- Size Preset & Custom Dimensions -->
+<div class="md:col-span-5 flex items-center space-x-2">
+<label class="text-slate-500 font-semibold shrink-0">输出尺寸:</label>
+<select class="bg-white border border-slate-200 rounded-full px-3 py-1 text-xs text-slate-800 font-medium shadow-pill focus:ring-orange-500 focus:border-[#ff5e36]" id="size" style="width:150px;min-width:150px;padding-right:36px;flex-shrink:0"><option value="0">保持原始尺寸</option><option value="1">1650 × 1650</option><option value="2">1464 × 600</option><option value="3">970 × 600</option><option value="4">自定义尺寸</option></select>
+<!-- Custom Width x Height inputs -->
+<div class="flex items-center space-x-1.5 bg-white border border-slate-200 rounded-full px-3 py-0.5 shadow-pill" id="custom-size-fields">
+<input class="w-12 text-center p-0 border-0 text-xs font-mono font-bold focus:ring-0 text-slate-800" type="number" value="1464" id="width" min="1" max="50000">
+<span class="text-slate-400">×</span>
+<input class="w-12 text-center p-0 border-0 text-xs font-mono font-bold focus:ring-0 text-slate-800" type="number" value="600" id="height" min="1" max="50000">
+<span class="text-[10px] text-slate-400 font-medium">px</span>
+</div>
+</div>
+<!-- Transparent color picker -->
+<div class="md:col-span-3 flex items-center justify-end space-x-2.5"><span class="text-slate-500">透明区域默认填充白色</span></div>
+</div>
+<!-- Line 3: Optional sequential output naming -->
+<div class="flex flex-wrap items-center gap-3 rounded-2xl bg-white/70 border border-slate-200/70 px-3 py-2 text-xs">
+<label class="flex items-center space-x-2 text-slate-700 font-semibold cursor-pointer shrink-0">
+<input class="w-4 h-4 text-[#ff5e36] rounded border-slate-300 focus:ring-0" type="checkbox" id="customNameEnabled">
+<span>自定义命名</span>
+</label>
+<label class="flex items-center gap-2 text-slate-500 font-semibold shrink-0">
+<span>名称前缀:</span>
+<select class="bg-white border border-slate-200 rounded-full px-3 py-1 text-xs text-slate-800 font-medium shadow-pill focus:ring-orange-500 focus:border-[#ff5e36]" id="namePrefix" style="width:100px;min-width:100px;padding-right:32px;flex-shrink:0" data-custom-name-control><option value="主图">主图</option><option value="副图">副图</option><option value="A">A</option></select>
+</label>
+<label class="flex items-center gap-2 text-slate-500 font-semibold shrink-0">
+<span>起始后缀:</span>
+<input class="w-24 bg-white border border-slate-200 rounded-full px-3 py-1 text-center text-xs text-slate-800 font-mono font-bold shadow-pill focus:ring-orange-500 focus:border-[#ff5e36]" type="number" id="nameSuffix" value="1" min="1" max="999999" step="1" data-custom-name-control>
+</label>
+<span class="text-slate-400 ml-auto" id="name-preview">示例：主图1、主图2…</span>
+</div>
+<!-- Line 3: Switches, Progress bar, and Launch CTA -->
+<div class="flex flex-wrap items-center justify-between pt-1.5 border-t border-slate-200/60 gap-4">
+<!-- Toggles -->
+<div class="flex items-center space-x-5 text-xs text-slate-600 font-medium">
+<label class="flex items-center space-x-2 cursor-pointer">
+<input class="w-4 h-4 text-[#ff5e36] rounded border-slate-300 focus:ring-0" type="checkbox" id="alpha">
+<span class="">保留透明背景通道</span>
+</label>
+<label class="flex items-center space-x-2 cursor-pointer">
+<input class="w-4 h-4 text-[#ff5e36] rounded border-slate-300 focus:ring-0" type="checkbox" id="openFolder">
+<span class="">完成后自动打开文件夹</span>
+</label>
+</div>
+<!-- Conversion Action Button and Progress -->
+<div class="conversion-actions flex items-center space-x-4">
+<!-- Overall Progress Mini Capsule -->
+<div class="conversion-progress hidden sm:flex flex-col"><progress id="live-progress" max="100" value="0"></progress><span id="live-status" title="就绪">就绪</span></div>
+<!-- Cancel Secondary -->
+<button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-full text-xs font-semibold transition shadow-pill active:scale-95" data-action="cancel">
+            取消处理
+          </button>
+<!-- Main Launch Coral CTA -->
+<button class="inline-flex items-center px-6 py-2 bg-[#ff5e36] hover:bg-[#ff4b1f] text-white rounded-full text-xs font-bold shadow-coral transition active:scale-95 space-x-2" data-action="start">
+<svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+<path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill-rule="evenodd"></path>
+</svg>
+<span class="">开始转换</span>
+</button>
+</div>
+</div>
+</footer>
+<!-- END: Bottom Parameters & Export Control Bar -->
+</main>
+<!-- END: Main White Content Card -->
+</div>
+<!-- END: Floating Outer Shell -->
+
+
+<div id="toast" role="status"></div></body></html>
+
+
+
+
+
+
+
+

@@ -1,0 +1,290 @@
+<!DOCTYPE html><html class="h-full" lang="zh-CN" data-ready="false"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>蟑螂强 · API 配置</title>
+
+
+
+
+
+
+
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+<link rel="stylesheet" href="settings.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><script src="theme.js"></script><script defer="" src="settings.js"></script></head>
+<body class="h-full bg-background text-on-surface font-body-default select-none overflow-hidden antialiased" data-page="settings">
+<!-- Desktop App Background Canvas (Simulating PixFlow Studio underneath) -->
+
+<!-- Modal Backdrop Layer (Mica Depth Overlay) -->
+<div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[6px] transition-opacity">
+<!-- Modal Dialog Envelope (Windows Fluent Modal: 820px max width, Level 3 Elevation) -->
+<div class="relative w-full max-w-[820px] max-h-[92vh] flex flex-col bg-surface-container-lowest rounded-xl border border-[#94A3B8]/60 shadow-[0_12px_36px_rgba(15,23,42,0.22)] overflow-hidden transition-all transform scale-100">
+<!-- 1. Window Title Bar (Native Windows 11 Fluent App Bar) -->
+<div class="h-11 px-4 bg-surface-container-low border-b border-outline-variant/60 flex items-center justify-between select-none shrink-0">
+<!-- Title & Icon -->
+<div class="flex items-center gap-2.5">
+<div class="w-5 h-5 rounded bg-primary-container/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[16px]">auto_fix_high</span>
+</div>
+<span class="font-headline-md text-headline-md text-on-surface tracking-tight text-[13px] font-semibold">图片清晰 · API 配置</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-caption-sm text-primary bg-primary-fixed font-medium">RESTful Direct</span>
+</div>
+<!-- Window Controls -->
+<div class="flex items-center -mr-1">
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-surface-container-high transition-colors text-[16px]" title="帮助文档" type="button" data-action="help">
+<span class="material-symbols-outlined text-[16px]">help</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded text-on-surface-variant hover:bg-error hover:text-on-error transition-colors text-[16px]" title="关闭" type="button" data-action="closeSettings">
+<span class="material-symbols-outlined text-[18px]">close</span>
+</button>
+</div>
+</div>
+<!-- 2. Scrollable Modal Form Workspace -->
+<div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 bg-surface-container-lowest">
+<!-- Quick Guidance Banner -->
+<div class="flex items-start gap-3 p-3.5 rounded-lg bg-surface-container-low border border-outline-variant/70">
+<span class="material-symbols-outlined text-primary text-[20px] mt-0.5">verified_user</span>
+<div class="text-[12px] leading-relaxed text-on-surface-variant">
+<span class="font-label-medium text-on-surface font-semibold">服务凭据存储规范：</span>
+            密钥使用 Windows 数据保护 API 在本机加密保存。配置格式检查不发送图片请求。
+          </div>
+</div>
+<!-- LEVEL 1: 核心基础设置 (Core High-Frequency Configuration) -->
+<section class="space-y-4">
+<div class="flex items-center justify-between pb-1 border-b border-outline-variant/50">
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<h3 class="font-headline-md text-headline-md text-on-surface text-[14px] font-bold">核心基础设置</h3>
+<span class="text-on-surface-variant text-[12px] font-normal">（必填项 · 执行超分修复的基准通路）</span>
+</div>
+<span class="font-caption-sm text-caption-sm text-primary font-medium cursor-pointer hover:underline">重置为 OpenAI 官方标准</span>
+</div>
+<!-- Protocol Selection -->
+<div class="grid grid-cols-12 gap-4 items-center">
+<label class="col-span-3 font-label-medium text-label-medium text-on-surface text-right pr-2">
+              接口协议 <span class="text-error">*</span>
+</label>
+<div class="col-span-9 relative">
+<select class="w-full h-9 pl-3 pr-9 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-body-default text-[13px] focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer" id="protocolSelect" data-field="Protocol"><option>OpenAI Images</option><option>Gemini</option><option>Gemini Interactions</option><option>JSON</option><option>Multipart</option><option>Binary</option></select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 pointer-events-none text-outline text-[18px]">expand_more</span>
+</div>
+</div>
+<!-- Full Endpoint URL -->
+<div class="grid grid-cols-12 gap-4 items-start">
+<label class="col-span-3 font-label-medium text-label-medium text-on-surface text-right pt-2 pr-2">
+              完整接口地址 <span class="text-error">*</span>
+</label>
+<div class="col-span-9 space-y-1.5">
+<div class="relative flex items-center">
+<input class="w-full h-9 pl-3 pr-24 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-mono text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="endpointInput" placeholder="https://..." type="text" value="https://api.openai.com/v1/images/edits" data-field="Endpoint">
+<button class="absolute right-1.5 px-2 py-1 rounded bg-surface-container text-primary hover:bg-surface-container-high font-label-regular text-[11px] transition-colors" type="button" data-action="preset">
+                  官方默认
+                </button>
+</div>
+<p class="font-caption-sm text-caption-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">info</span>
+                支持填写自建网关或 OneAPI / NewAPI 中转反代路由
+              </p>
+</div>
+</div>
+<!-- Model Name -->
+<div class="grid grid-cols-12 gap-4 items-center">
+<label class="col-span-3 font-label-medium text-label-medium text-on-surface text-right pr-2">
+              模型名称 <span class="text-error">*</span>
+</label>
+<div class="col-span-9 flex items-center gap-2">
+<div class="relative flex-1">
+<input class="w-full h-9 px-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-body-default text-[13px] focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all" id="modelInput" type="text" value="gpt-image-2" data-field="Model">
+</div>
+<div class="flex items-center gap-1">
+<button class="px-2.5 h-8 rounded border border-outline-variant bg-surface-container-low hover:bg-surface-container text-on-surface text-[11px] transition-colors" type="button" data-action="modelPreset">
+                  gpt-image-2
+                </button>
+<button class="px-2.5 h-8 rounded border border-outline-variant bg-surface-container-low hover:bg-surface-container text-on-surface text-[11px] transition-colors" type="button" data-action="modelPreset">
+                  dall-e-2
+                </button>
+<button class="px-2.5 h-8 rounded border border-outline-variant bg-surface-container-low hover:bg-surface-container text-on-surface text-[11px] transition-colors" type="button" data-action="modelPreset">
+                  Nano Banana 2
+                </button>
+</div>
+</div>
+</div>
+<!-- API Key Security Field -->
+<div class="grid grid-cols-12 gap-4 items-start">
+<label class="col-span-3 font-label-medium text-label-medium text-on-surface text-right pt-2 pr-2">
+              API Key <span class="text-error">*</span>
+</label>
+<div class="col-span-9 space-y-2">
+<div class="relative flex items-center">
+<input class="w-full h-9 pl-3 pr-20 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-mono text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all tracking-wider" id="apiKeyInput" type="password" value="" placeholder="密钥保存后会以星号显示">
+<div class="absolute right-1.5 flex items-center gap-1">
+<button class="w-7 h-7 flex items-center justify-center rounded text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors" id="toggleApiKeyBtn" title="显示/隐藏明文" type="button" data-action="toggleKey">
+<span class="material-symbols-outlined text-[16px]" id="eyeIcon">visibility</span>
+</button>
+<button class="px-2 py-1 rounded bg-surface-container-high text-primary hover:bg-primary-container hover:text-on-primary-container font-label-regular text-[11px] transition-colors" type="button" data-action="pasteKey">
+                    粘贴
+                  </button>
+</div>
+</div>
+<!-- Checkbox & Security Notice -->
+<div class="flex items-center justify-between">
+<label class="inline-flex items-center gap-2 cursor-pointer">
+<input class="w-4 h-4 rounded border-outline text-primary focus:ring-primary/30" id="clearKeyCheckbox" type="checkbox">
+<span class="font-label-regular text-label-regular text-on-surface-variant hover:text-on-surface">清除已保存的密钥 (恢复无鉴权模式)</span>
+</label>
+<div class="flex items-center gap-1 text-[11px] text-tertiary font-caption-sm">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+<span>Windows 凭据保护 (DPAPI 独立隔离)</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Enhancement Prompt Area -->
+<div class="grid grid-cols-12 gap-4 items-start">
+<label class="col-span-3 font-label-medium text-label-medium text-on-surface text-right pt-2 pr-2">
+              清晰化提示词
+            </label>
+<div class="col-span-9 space-y-1">
+<textarea class="w-full p-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-body-default text-[13px] leading-relaxed focus:border-primary focus:ring-2 focus:ring-primary/20 resize-none transition-all" rows="4" data-field="Prompt">请基于原图提高图片清晰度，减少模糊和噪点。保持主体、构图、颜色、文字、Logo和背景一致，不新增或删除内容，返回处理后的图片。</textarea>
+<div class="flex items-center justify-between text-on-surface-variant text-[11px]">
+<span>提示词工程已锁定边缘锐化及抗噪指令集</span>
+<span class="font-mono text-outline">86 字</span>
+</div>
+</div>
+</div>
+</section>
+<!-- LEVEL 2: 高级网络与数据格式设置 (Accordion Collapsible Card) -->
+<section class="border border-outline-variant/80 rounded-xl overflow-hidden bg-surface-container-lowest shadow-sm">
+<!-- Accordion Header Bar -->
+<div class="w-full px-4 py-3 bg-surface-container-low/60 hover:bg-surface-container-low flex items-center justify-between cursor-pointer transition-colors border-b border-outline-variant/40">
+<div class="flex items-center gap-2.5">
+<span class="material-symbols-outlined text-primary text-[18px]">settings_ethernet</span>
+<span class="font-label-medium text-label-medium text-on-surface font-semibold text-[13px]">高级请求与字段配置（用于自定义网关及中转接口适配）</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-[11px] text-on-surface-variant font-caption-sm" id="accordionStatusBadge">已展开 8 项高级参数</span>
+<span class="material-symbols-outlined text-outline transition-transform duration-200" id="accordionArrow">expand_less</span>
+</div>
+</div>
+<!-- Accordion Body -->
+<div class="p-5 space-y-4 bg-surface-container-lowest transition-all" id="advancedSettingsContent">
+<!-- Row 1: Auth Header & Token Prefix -->
+<div class="grid grid-cols-12 gap-4">
+<div class="col-span-6 space-y-1">
+<label class="font-label-medium text-label-medium text-on-surface block">鉴权请求头</label>
+<input class="w-full h-8 px-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-body-default text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20" type="text" value="Authorization" data-field="AuthHeader">
+</div>
+<div class="col-span-6 space-y-1">
+<label class="font-label-medium text-label-medium text-on-surface block">密钥前缀（含空格）</label>
+<input class="w-full h-8 px-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-mono text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20" type="text" value="Bearer " data-field="AuthPrefix">
+</div>
+</div>
+<!-- Row 2: Image Field & Timeout -->
+<div class="grid grid-cols-12 gap-4">
+<div class="col-span-6 space-y-1">
+<label class="font-label-medium text-label-medium text-on-surface block">图片字段名</label>
+<input class="w-full h-8 px-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-body-default text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20" type="text" value="image" data-field="ImageField">
+</div>
+<div class="col-span-6 space-y-1">
+<label class="font-label-medium text-label-medium text-on-surface block">超时时间（秒）</label>
+<div class="relative flex items-center">
+<input class="w-full h-8 px-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-mono text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20" max="1800" min="10" type="number" value="300" data-field="TimeoutSeconds">
+<div class="absolute right-2 text-[11px] text-outline pointer-events-none">SEC</div>
+</div>
+</div>
+</div>
+<!-- Row 3: Encoding & Response Format -->
+<div class="grid grid-cols-12 gap-4">
+<div class="col-span-6 space-y-1">
+<label class="font-label-medium text-label-medium text-on-surface block">JSON 图片编码</label>
+<div class="relative">
+<select class="w-full h-8 pl-3 pr-8 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" data-field="ImageEncoding"><option>data-url</option><option>base64</option></select>
+<span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-outline text-[16px]">expand_more</span>
+</div>
+</div>
+<div class="col-span-6 space-y-1">
+<label class="font-label-medium text-label-medium text-on-surface block">返回图片格式</label>
+<div class="relative">
+<select class="w-full h-8 pl-3 pr-8 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20 cursor-pointer" data-field="ResponseType"><option>base64</option><option>url</option><option>binary</option></select>
+<span class="material-symbols-outlined absolute right-2 top-2 pointer-events-none text-outline text-[16px]">expand_more</span>
+</div>
+</div>
+</div>
+<!-- Row 4: Path Extraction -->
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<label class="font-label-medium text-label-medium text-on-surface block">返回字段路径 (JSONPath 取值)</label>
+<span class="font-caption-sm text-caption-sm text-outline">通用路径示例: data.0.url 或 result.image</span>
+</div>
+<input class="w-full h-8 px-3 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface font-mono text-[12px] focus:border-primary focus:ring-2 focus:ring-primary/20" type="text" value="data.0.b64_json" data-field="ResponsePath">
+</div>
+<!-- Row 5: Additional Parameters JSON -->
+<div class="space-y-1">
+<div class="flex items-center justify-between">
+<label class="font-label-medium text-label-medium text-on-surface block">附加参数 JSON (用于透传自定义超参)</label>
+<button class="text-primary hover:underline text-[11px] font-caption-sm" type="button" data-action="formatJson">格式化 JSON</button>
+</div>
+<div class="relative rounded-lg border border-[#CBD5E1] bg-slate-900 overflow-hidden">
+<div class="flex items-center justify-between px-3 py-1 bg-slate-800 text-[10px] text-slate-400 font-mono border-b border-slate-700">
+<span>RAW PAYLOAD EDITOR</span>
+<span>UTF-8</span>
+</div>
+<textarea class="w-full p-3 bg-transparent text-emerald-400 font-mono text-[12px] leading-tight focus:outline-none resize-none" id="jsonPayloadArea" rows="3" data-field="FieldsJson">{}</textarea>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- 3. Modal Action Footer Bar (Standardized Desktop Process Bar) -->
+<div id="config-status" role="status" aria-live="polite" hidden></div>
+<div class="h-14 px-6 bg-surface-container-low border-t border-outline-variant/70 flex items-center justify-between shrink-0">
+<!-- Left: Contextual Specs Summary -->
+<div class="flex items-center gap-2 text-on-surface-variant font-caption-sm text-[11px]">
+<span class="material-symbols-outlined text-[15px] text-tertiary">tune</span>
+<span>OpenAI 协议就绪 · 默认启用 300s 超时防堵塞</span>
+</div>
+<!-- Right: Action Button Cluster -->
+<div class="flex items-center gap-3">
+<!-- Connection Diagnostic CTA -->
+<button class="h-8 px-3.5 rounded-lg border border-[#CBD5E1] bg-surface-container-lowest text-on-surface hover:bg-surface-container hover:text-primary active:scale-95 font-label-medium text-label-medium transition-all flex items-center gap-1.5 shadow-sm" type="button" data-action="validateConfig">
+<span class="material-symbols-outlined text-[16px] text-primary" id="testIcon">network_check</span>
+<span id="testBtnText">检查配置格式</span>
+</button>
+<!-- Cancel CTA -->
+<button class="h-8 px-4 rounded-lg border border-transparent hover:bg-surface-container-high text-on-surface-variant hover:text-on-surface font-label-regular text-label-regular transition-colors" type="button" data-action="closeSettings">
+            取消
+          </button>
+<!-- Primary Submit CTA -->
+<button class="h-8 px-5 rounded-lg bg-primary hover:bg-secondary text-on-primary font-label-medium text-label-medium shadow-sm hover:shadow active:scale-95 transition-all flex items-center gap-1.5" type="button" data-action="saveConfig">
+<span class="material-symbols-outlined text-[16px]">save</span>
+<span>保存配置</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Interactive JavaScript Handling Window Logic -->
+
+<div id="toast" role="status"></div></body></html>

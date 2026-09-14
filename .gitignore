@@ -1,0 +1,23 @@
+# Local state and credentials
+data/
+*.tmp
+*.log
+
+# Generated and packaged artifacts
+PngToJpgLauncher.exe
+dist/
+release/
+tests/artifacts/
+
+# Bundled third-party runtimes are distributed separately
+tools/imagemagick/
+tools/poppler/
+tools/realesrgan/
+tools/webview2/
+
+# Editor and operating-system files
+.vs/
+.vscode/
+*.user
+Thumbs.db
+Desktop.ini

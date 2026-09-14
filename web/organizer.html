@@ -1,0 +1,315 @@
+<!DOCTYPE html><html lang="zh-CN" data-ready="false"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>蟑螂强 · organizer</title>
+<!-- Google Fonts Plus Jakarta Sans -->
+
+
+
+<!-- Tailwind CSS CDN -->
+
+<!-- Tailwind Custom Config -->
+
+<style>
+    /* 自定义细窄滚动条 */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #d8dde6;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #c3c9d4;
+    }
+    .desktop-history-card{border:1px solid var(--theme-border);border-radius:22px;background:var(--theme-surface-soft);padding:15px 17px}
+    .desktop-history-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.desktop-history-head h2{font-size:13px;font-weight:800;color:var(--theme-text)}.desktop-history-head p{font-size:11px;color:var(--theme-muted)}
+    .desktop-history-list{display:grid;gap:8px;max-height:164px;overflow:auto}.desktop-history-empty{padding:14px;border:1px dashed var(--theme-border);border-radius:14px;text-align:center;font-size:12px;color:var(--theme-muted)}
+    .desktop-history-row{width:100%;display:grid;grid-template-columns:minmax(130px,.8fr) minmax(180px,1.5fr) auto;align-items:center;gap:14px;padding:10px 12px;border:1px solid var(--theme-border);border-radius:14px;background:var(--theme-surface);text-align:left;transition:border-color .15s,box-shadow .15s,transform .15s}
+    .desktop-history-row:hover{border-color:var(--theme-accent);box-shadow:0 7px 18px color-mix(in srgb,var(--theme-accent) 13%,transparent);transform:translateY(-1px)}.desktop-history-row strong{display:block;color:var(--theme-text);font-size:12px}.desktop-history-row small{display:block;margin-top:3px;color:var(--theme-muted);font-size:10px}.desktop-history-path{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--theme-muted);font-size:11px}.desktop-history-restore{padding:6px 11px;border-radius:999px;background:var(--theme-accent);color:var(--theme-on-accent);font-size:11px;font-weight:800}
+</style>
+<link rel="stylesheet" href="organizer.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><script src="theme.js"></script><script defer="" src="app.js"></script></head>
+<body class="desktop-body" style="" data-page="organizer">
+<!-- BEGIN: Workspace Wrapper with Floating Sidebar & White Main Card -->
+<div id="window-bar"><span class="window-drag"><img class="titlebar-logo" src="assets/app-icon.ico" alt=""><span>蟑螂强</span></span><button data-action="minimize" title="最小化">−</button><button data-action="maximize" title="最大化">□</button><button data-action="close" title="关闭">×</button></div><div class="w-full h-full max-w-[1480px] max-h-[880px] flex items-stretch gap-5" id="desktop-shell">
+<!-- BEGIN: Left Floating Dark Pill Sidebar (Inspired by Reference) -->
+<aside class="w-64 bg-[#212327] text-white rounded-[28px] p-5 shadow-floating-sidebar flex flex-col justify-between shrink-0 select-none" id="global-sidebar">
+<div class="space-y-6">
+<!-- Brand Header -->
+<div class="flex items-center space-x-3 px-2 pt-1">
+<img class="brand-companion" src="assets/brand-companion.jpg" alt="蟑螂强副图">
+<div>
+<h2 class="text-sm font-bold tracking-tight text-white leading-tight">蟑螂强</h2>
+<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.4</p>
+</div>
+</div>
+<!-- Unified 6-item Navigation -->
+<nav aria-label="侧边主导航" class="space-y-1.5 pt-2">
+<!-- 1. 格式与尺寸转换 -->
+<button class="nav-item" title="格式与尺寸转换" data-action="conversion">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<rect height="18" rx="2" stroke-linecap="round" stroke-linejoin="round" width="18" x="3" y="3"></rect>
+<circle cx="8.5" cy="8.5" r="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+<path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">格式与尺寸转换</span>
+</button>
+<!-- 2. 图片清晰度增强 -->
+<button class="nav-item" title="图片清晰度增强" data-action="clarity">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 2v4m0 12v4M4 12H2m20 0h-2m-2.93-7.07l-2.83 2.83m-8.48 8.48l-2.83 2.83m0-14.14l2.83 2.83m8.48 8.48l2.83 2.83" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+</svg>
+</div>
+<span class="truncate">图片清晰度增强</span>
+</button>
+<!-- 3. 文件夹自动整理 -->
+<button class="nav-item" title="文件夹自动整理" data-action="organizer" aria-current="page">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">文件夹自动整理</span>
+</button>
+<!-- 4. 图片转链接 -->
+<button class="nav-item" title="图片转链接" data-action="imageLink">
+<div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 14a5 5 0 007.07 0l2-2a5 5 0 00-7.07-7.07l-1.15 1.15M14 10a5 5 0 00-7.07 0l-2 2A5 5 0 0012 19.07l1.15-1.15" stroke-linecap="round"></path></svg></div>
+<span class="truncate">图片转链接</span>
+</button>
+<button class="nav-item" title="本地内容搜索" data-action="localSearch">
+<div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4M8 11h6M11 8v6" stroke-linecap="round"></path></svg></div>
+<span class="truncate">本地内容搜索</span>
+</button>
+<!-- 5. 更新日志与版本 -->
+<button class="nav-item" title="更新日志与版本" data-action="changelog">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">更新日志与版本</span>
+</button>
+<!-- 6. 偏好设置 -->
+<button class="nav-item" title="偏好设置" data-action="settings">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+</svg>
+</div>
+<span class="truncate">偏好设置</span>
+</button>
+</nav>
+</div>
+<!-- 底部守护服务状态小卡片 -->
+<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.4</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
+</aside>
+<!-- END: Left Floating Dark Pill Sidebar -->
+<!-- BEGIN: Main White Floating Card Container -->
+<main class="flex-1 bg-white rounded-[28px] shadow-floating-main p-7 md:p-8 flex flex-col min-w-0 overflow-hidden border border-white/60">
+<!-- 顶部标题与主要操作按钮栏 -->
+<header class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-100 shrink-0">
+<div>
+<div class="flex items-center space-x-3">
+<h1 class="text-2xl font-extrabold tracking-tight text-slate-900">钉钉下载文件夹自动整理</h1>
+<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-[#ffede8] text-[#ff5e36] border border-[#ff5e36]/20 shadow-sm" id="organizer-badge">读取状态</span>
+</div>
+<p class="text-xs text-slate-400 font-medium mt-1.5">支持后台自动监控、批量选择与一次拖入多个项目文件夹 · 本地后台静默安全处理</p>
+</div>
+<!-- 顶部快捷行为控制区 (Rounded Pills) -->
+<div class="flex items-center space-x-3">
+<button class="inline-flex items-center px-4 py-2.5 rounded-full text-xs font-bold bg-[#f4f6f9] hover:bg-slate-200/80 text-slate-700 transition shadow-sm border border-slate-200/60" type="button" data-action="spreadsheets">
+<svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          批量打开表格
+        </button>
+<button class="inline-flex items-center px-5 py-2.5 rounded-full text-xs font-bold text-white bg-[#ff5e36] hover:bg-[#e04822] shadow-orange-glow active:scale-[0.98] transition" type="button" data-action="organizerStart">
+<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+          启动自动监控
+        </button>
+</div>
+</header>
+<!-- 可滚动内容主体 -->
+<div class="flex-1 overflow-y-auto pt-6 space-y-6 pr-1">
+<!-- BEGIN: 监控路径与操作开关卡片 -->
+<section aria-label="监控配置与控制项" class="bg-[#f8fafc] rounded-[28px] p-6 border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] space-y-5">
+<!-- 目录路径选择输入行 -->
+<div>
+<label class="block text-xs font-bold text-slate-400 tracking-wider uppercase mb-2">当前全局监控路径</label>
+<div class="flex items-center gap-3">
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-400">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<input class="w-full pl-11 pr-4 py-3 bg-white border border-slate-200/80 rounded-2xl text-xs sm:text-sm font-mono text-slate-700 select-all focus:ring-2 focus:ring-[#ff5e36]/30 focus:border-[#ff5e36] outline-none transition shadow-sm" readonly="" type="text" value="" id="organizer-path">
+</div>
+<button class="px-5 py-3 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-2xl border border-slate-200/80 transition shrink-0 flex items-center shadow-sm" type="button" data-action="organizerBrowse">
+<svg class="w-4 h-4 mr-1.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+              更改目录...
+            </button>
+</div>
+<!-- 当前生效指示小标签 -->
+<div class="mt-2.5 flex items-center space-x-2 text-xs font-semibold text-[#ff5e36]" id="organizer-note">仅读取已配置的监控目录</div>
+</div>
+<!-- 行为操作按钮组与 iOS 风格 Toggle 开关区 -->
+<div class="pt-4 border-t border-slate-200/70 flex flex-wrap items-center justify-between gap-4">
+<!-- 左侧操作按钮组 -->
+<div class="flex flex-wrap items-center gap-2.5">
+<button class="px-4 py-2.5 text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100/80 border border-rose-200/70 rounded-full transition flex items-center shadow-sm" type="button" data-action="organizerStop">
+<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+              停止自动监控
+            </button>
+<button class="px-4 py-2.5 text-xs font-bold text-white bg-slate-900 hover:bg-black rounded-full transition flex items-center shadow-sm" type="button" data-action="organizerSingle">
+<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+<path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+              添加一个文件夹...
+            </button>
+<button class="px-4 py-2.5 text-xs font-bold text-white bg-[#ff5e36] hover:bg-[#e04822] rounded-full transition flex items-center shadow-orange-glow" type="button" data-action="organizerBatch">
+<svg class="w-3.5 h-3.5 mr-1" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+              批量添加子文件夹...
+            </button>
+<button class="px-4 py-2.5 text-xs font-bold text-slate-600 bg-white hover:bg-slate-100 border border-slate-200/90 rounded-full transition flex items-center shadow-sm" type="button" data-action="organizerOpen">
+<svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+              打开钉钉目录
+            </button>
+</div>
+<!-- 右侧 iOS 风格开关交互区 (Refactor with Coral Orange) -->
+<div class="flex flex-wrap items-center justify-end gap-4">
+<!-- Switch 1: 整理后打开表格 -->
+<label class="flex items-center cursor-pointer group select-none">
+<div class="relative">
+<input class="sr-only peer" type="checkbox" id="organizerOpenSheet">
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-[#ff5e36]"></div>
+</div>
+<div class="ml-2.5 text-left">
+<div class="text-xs font-bold text-slate-800 group-hover:text-[#ff5e36] transition">整理后打开表格</div>
+<div class="text-[11px] text-slate-400">单个与批量整理均遵守</div>
+</div>
+</label>
+<!-- Switch 2: 指定表格打开屏幕 -->
+<div class="flex items-center gap-2.5">
+<label class="flex items-center cursor-pointer group select-none">
+<div class="relative">
+<input class="sr-only peer" type="checkbox" id="organizerTargetScreenEnabled">
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-[#ff5e36]"></div>
+</div>
+<div class="ml-2.5 text-left">
+<div class="text-xs font-bold text-slate-800 group-hover:text-[#ff5e36] transition">指定表格屏幕</div>
+<div class="text-[11px] text-slate-400">勾选后选择打开位置</div>
+</div>
+</label>
+<select id="organizerTargetScreen" aria-label="表格打开屏幕" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none disabled:opacity-45 disabled:cursor-not-allowed">
+<option value="1">第一个屏幕</option>
+<option value="2">第二个屏幕</option>
+</select>
+</div>
+<!-- Switch 3: 屏幕顶部显示灵动岛 -->
+<label class="flex items-center cursor-pointer group select-none">
+<div class="relative">
+<input class="sr-only peer" type="checkbox" id="organizerIsland">
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all after:shadow-sm peer-checked:bg-[#ff5e36]"></div>
+</div>
+<div class="ml-2.5 text-left">
+<div class="text-xs font-bold text-slate-800 group-hover:text-[#ff5e36] transition">显示灵动岛</div>
+<div class="text-[11px] text-slate-400">屏幕顶部实时整理动态</div>
+</div>
+</label>
+</div>
+</div>
+</section>
+<!-- END: 监控路径与操作开关卡片 -->
+<section aria-label="桌面成品自动整理" class="bg-gradient-to-r from-[#fff7f4] to-white rounded-[24px] border border-[#ff5e36]/20 shadow-[0_4px_20px_-4px_rgba(255,94,54,0.12)] p-5 flex flex-wrap items-center justify-between gap-4">
+<div class="flex items-start min-w-[280px] flex-1">
+<div><h2 class="text-sm font-extrabold text-slate-900">桌面成品自动整理</h2><p class="text-[11px] text-slate-500 mt-1">仅点击按钮时执行；按 PSD 编号归档所选屏幕区域内的桌面图片。</p></div>
+</div>
+<div class="flex flex-wrap items-center gap-2.5">
+<label for="desktop-organize-scope" class="text-xs font-bold text-slate-600">识别范围</label>
+<select id="desktop-organize-scope" class="px-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-[#ff5e36]/20"><option value="left">屏幕左侧</option><option value="center">屏幕中间</option><option value="right">屏幕右侧</option><option value="all">全局</option></select>
+<div class="flex items-center gap-1.5"><button class="px-4 py-2.5 text-xs font-bold text-white bg-[#ff5e36] hover:bg-[#e04822] rounded-full transition shadow-orange-glow" type="button" data-action="desktopProductOrganize">自动整理桌面</button><button type="button" data-action="desktopOrganizerInfo" title="仅点击整理时执行：以所选区域内的 PSD 文件名为编号，将主图/副图/A 图归入同名文件夹，其他图片归入素材；点击查看完整说明。" aria-label="查看桌面成品自动整理说明" class="w-9 h-9 shrink-0 rounded-full border-2 border-[#ff5e36] bg-white text-[#ff5e36] text-base font-black shadow-sm hover:bg-[#ff5e36] hover:text-white transition">!</button></div>
+</div>
+</section>
+<section class="desktop-history-card" aria-label="桌面整理恢复记录">
+<div class="desktop-history-head"><div><h2>最近 30 天整理记录</h2><p>每次整理都会单独保存；点击对应记录即可恢复那一次。</p></div><p id="desktop-history-count">0 条可恢复记录</p></div>
+<div class="desktop-history-list" id="desktop-history-list"><div class="desktop-history-empty">最近 30 天暂无桌面整理记录</div></div>
+</section>
+<!-- BEGIN: 拖拽放置上传区 (Tactile soft card styled like reference) -->
+<section aria-label="拖拽投入区域" class="relative group rounded-[28px] border-2 border-dashed border-slate-200 hover:border-[#ff5e36] bg-[#f8fafc]/80 hover:bg-[#fff9f7] p-8 text-center transition-all cursor-pointer shadow-[0_2px_12px_rgba(0,0,0,0.02)]" data-action="organizerSingle">
+<div class="flex flex-col items-center justify-center space-y-3">
+<div class="w-14 h-14 rounded-full bg-white text-[#ff5e36] flex items-center justify-center group-hover:scale-105 group-hover:bg-[#ff5e36] group-hover:text-white transition-all shadow-md shadow-slate-200/50">
+<svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<div>
+<h3 class="text-base font-extrabold text-slate-800 group-hover:text-[#ff5e36] transition">把多个项目文件夹一次拖到这里</h3>
+<p class="text-xs text-slate-400 mt-1 max-w-xl mx-auto leading-relaxed">
+              支持任意位置的多个文件夹；全部加入后台队列并逐个安全整理，绝不覆盖同名内容。<br>
+              批量添加按钮会加入所选父目录下的全部第一层子文件夹。
+            </p>
+</div>
+</div>
+</section>
+<!-- END: 拖拽放置上传区 -->
+<!-- BEGIN: 实时整理控制台与流水线日志 (Rounded-24px Container) -->
+<section aria-label="批量整理记录与队列" class="bg-[#f8fafc] rounded-[24px] border border-slate-200/80 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.03)] overflow-hidden flex flex-col">
+<!-- 终端标题栏 -->
+<div class="px-5 py-3.5 bg-white border-b border-slate-100 flex items-center justify-between">
+<div class="flex items-center space-x-2.5">
+<div class="flex space-x-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+<span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+</div>
+<span class="text-xs font-bold text-slate-700 tracking-wide ml-2">批量整理记录与执行流水线</span>
+</div>
+<div class="flex items-center space-x-4 text-xs font-medium text-slate-500">
+<span class="flex items-center">执行记录</span>
+<button class="text-xs text-slate-400 hover:text-slate-600 hover:underline" type="button" data-action="organizerClearLog">清空记录</button>
+</div>
+</div>
+<!-- 日志内容区域 -->
+<div class="p-4 bg-[#f8fafc] font-mono text-xs text-slate-600 space-y-2.5 max-h-52 overflow-y-auto leading-relaxed select-text" id="organizer-log"></div>
+<!-- 控制台底部状态栏 -->
+<div class="px-5 py-2.5 bg-white border-t border-slate-100 flex items-center justify-between text-[11px] font-medium text-slate-400"><span id="organizer-status">监控未启动</span><span id="organizer-pending"></span></div>
+</section>
+<!-- END: 实时整理控制台与流水线日志 -->
+</div>
+<dialog id="spreadsheet-dialog"><h2>批量打开表格</h2><p>添加父目录下的项目文件夹，检查队列后打开表格。</p><div class="dialog-actions"><button data-action="spreadsheetAdd">添加父目录…</button><button data-action="spreadsheetClear">清空列表</button><button data-action="spreadsheetOpen" class="primary">打开全部表格</button><button data-action="dismissSheet">返回</button></div><div id="spreadsheet-list"></div><p id="spreadsheet-status"></p></dialog>
+<dialog id="desktop-organizer-info-dialog"><h2>桌面成品自动整理说明</h2><p>这个功能不会后台自动运行，只有点击“自动整理桌面”才会生效。</p><p>先按选择的“屏幕左侧 / 中间 / 右侧 / 全局”读取桌面图标位置。所选区域内必须恰好有一个 PSD 或 PSB；它的文件名就是商品编号，例如 123.psd 对应编号 123。</p><p>程序会查找编号母文件夹：PSD 放到 123 母文件夹第一层；“主图+数字”“副图+数字”“A+数字”的图片放到 123\123；ChatGPT Image、生成图片等其他图片放到 123\素材；123 源文件完全不处理。</p><p>若 PSD 不唯一、母文件夹不唯一、读不到图标位置或目标不明确，程序会停止而不猜测。同名文件不会覆盖，会自动加序号。每次整理会生成一条可点击恢复的记录，保存 30 天，互不阻塞后续整理。</p><div class="dialog-actions"><button data-action="dismissDesktopOrganizerInfo" class="primary">我知道了</button></div></dialog></main>
+<!-- END: Main White Floating Card Container -->
+</div>
+<!-- END: Workspace Wrapper -->
+
+
+<div id="toast" role="status"></div></body></html>
+
+
+
+
+
+
+
+

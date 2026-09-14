@@ -1,0 +1,195 @@
+<!DOCTYPE html><html lang="zh-CN" data-ready="false"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>蟑螂强 · changelog</title>
+<!-- Google Fonts -->
+
+
+
+<!-- Tailwind CSS v3 with Plugins -->
+
+<!-- Tailwind Custom Configuration -->
+
+<!-- Custom Scrollbar & Utility Styles -->
+<style data-purpose="custom-scrollbars">
+    /* Subtle modern scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e1;
+    }
+    .timeline-stem {
+      position: absolute;
+      top: 28px;
+      bottom: -32px;
+      left: 17px;
+      width: 2px;
+      background: linear-gradient(to bottom, #ffdbd1 0%, #edf2f7 85%, transparent 100%);
+    }
+  </style>
+<link rel="stylesheet" href="changelog.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><script src="theme.js"></script><script defer="" src="app.js"></script></head>
+<body class="desktop-body" style="" data-page="changelog">
+<!-- Outer Canvas Flex Layout -->
+<div id="window-bar"><span class="window-drag"><img class="titlebar-logo" src="assets/app-icon.ico" alt=""><span>蟑螂强</span></span><button data-action="minimize" title="最小化">−</button><button data-action="maximize" title="最大化">□</button><button data-action="close" title="关闭">×</button></div><div class="h-[900px] w-full max-w-[1440px] mx-auto p-6 flex gap-6 box-border overflow-hidden" id="desktop-shell">
+<!-- BEGIN: Left Floating Pill Sidebar (Inspired by Reference Image) -->
+<aside class="w-64 bg-[#212327] text-white rounded-[28px] p-5 shadow-floating-sidebar flex flex-col justify-between shrink-0 select-none" id="global-sidebar">
+<div class="space-y-6">
+<!-- Brand Header -->
+<div class="flex items-center space-x-3 px-2 pt-1">
+<img class="brand-companion" src="assets/brand-companion.jpg" alt="蟑螂强副图">
+<div>
+<h2 class="text-sm font-bold tracking-tight text-white leading-tight">蟑螂强</h2>
+<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.4</p>
+</div>
+</div>
+<!-- Unified 6-item Navigation -->
+<nav aria-label="侧边主导航" class="space-y-1.5 pt-2">
+<!-- 1. 格式与尺寸转换 -->
+<button class="nav-item" title="格式与尺寸转换" data-action="conversion">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<rect height="18" rx="2" stroke-linecap="round" stroke-linejoin="round" width="18" x="3" y="3"></rect>
+<circle cx="8.5" cy="8.5" r="1.5" stroke-linecap="round" stroke-linejoin="round"></circle>
+<path d="M21 15l-5-5L5 21" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">格式与尺寸转换</span>
+</button>
+<!-- 2. 图片清晰度增强 -->
+<button class="nav-item" title="图片清晰度增强" data-action="clarity">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 2v4m0 12v4M4 12H2m20 0h-2m-2.93-7.07l-2.83 2.83m-8.48 8.48l-2.83 2.83m0-14.14l2.83 2.83m8.48 8.48l2.83 2.83" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+</svg>
+</div>
+<span class="truncate">图片清晰度增强</span>
+</button>
+<!-- 3. 文件夹自动整理 -->
+<button class="nav-item" title="文件夹自动整理" data-action="organizer">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">文件夹自动整理</span>
+</button>
+<!-- 4. 图片转链接 -->
+<button class="nav-item" title="图片转链接" data-action="imageLink">
+<div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M10 14a5 5 0 007.07 0l2-2a5 5 0 00-7.07-7.07l-1.15 1.15M14 10a5 5 0 00-7.07 0l-2 2A5 5 0 0012 19.07l1.15-1.15" stroke-linecap="round"></path></svg></div>
+<span class="truncate">图片转链接</span>
+</button>
+<button class="nav-item" title="本地内容搜索" data-action="localSearch">
+<div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-4-4M8 11h6M11 8v6" stroke-linecap="round"></path></svg></div>
+<span class="truncate">本地内容搜索</span>
+</button>
+<!-- 5. 更新日志与版本 -->
+<button class="nav-item" title="更新日志与版本" data-action="changelog" aria-current="page">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">更新日志与版本</span>
+</button>
+<!-- 6. 偏好设置 -->
+<button class="nav-item" title="偏好设置" data-action="settings">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" stroke-linecap="round" stroke-linejoin="round"></path>
+<circle cx="12" cy="12" r="3" stroke-linecap="round" stroke-linejoin="round"></circle>
+</svg>
+</div>
+<span class="truncate">偏好设置</span>
+</button>
+</nav>
+</div>
+<!-- 底部守护服务状态小卡片 -->
+<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.4</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
+</aside>
+<!-- END: Left Floating Pill Sidebar -->
+<!-- BEGIN: Main Content Area (Floating Pristine White Card) -->
+<div class="flex-1 h-full bg-white shadow-floating-main border border-slate-100/80 rounded-[28px] overflow-hidden flex flex-col relative box-border">
+<!-- Window Top Header (Traffic lights & Status Badge) -->
+<header class="h-16 px-8 flex items-center justify-between border-b border-slate-100/90 shrink-0 bg-white/80 backdrop-blur-md" data-purpose="window-header">
+<div class="flex items-center space-x-3 text-xs text-slate-500 font-medium">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#f8f9ff] text-slate-700 border border-slate-200/60 shadow-xs">当前版本: v3.0.4</span>
+<span class="text-slate-300">/</span>
+<span class="text-slate-500 font-medium">系统状态: 运行正常</span>
+</div>
+<!-- Native Window Action Pills -->
+<div class="flex items-center space-x-2">
+<button class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100/70 hover:bg-slate-200/70 text-slate-500 transition-colors" title="最小化" data-action="minimize">
+<svg class="w-3.5 h-3.5" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" x2="19" y1="12" y2="12"></line></svg>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100/70 hover:bg-slate-200/70 text-slate-500 transition-colors" title="最大化" data-action="maximize">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect height="16" rx="2" width="16" x="4" y="4"></rect></svg>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100/70 hover:bg-rose-50 hover:text-rose-600 text-slate-500 transition-colors" title="关闭窗口" data-action="close">
+<svg class="w-3.5 h-3.5" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" x2="6" y1="6" y2="18"></line><line x1="6" x2="18" y1="6" y2="18"></line></svg>
+</button>
+</div>
+</header>
+<!-- Scrollable Core Content Area -->
+<main class="flex-1 overflow-y-auto px-8 lg:px-12 py-8 flex flex-col">
+<!-- Page Header & Action Banner -->
+<section class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-100" data-purpose="page-title-banner">
+<div>
+<div class="flex items-center gap-3 mb-2">
+<h1 class="text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight font-sans">更新日志与版本历史</h1>
+<span class="text-xs font-bold px-3 py-1 rounded-full bg-[#ffdbd1] text-[#b42901] border border-[#ffb59f]">Release Notes</span>
+</div>
+<p class="text-sm text-slate-500">查看图片处理、文件夹智能整理与灵动岛光效等核心引擎的迭代与修复记录</p>
+</div>
+<!-- Quick Action Buttons (Refined style) -->
+<div class="flex items-center space-x-3 shrink-0">
+<button class="inline-flex items-center gap-2 px-4 py-2.5 text-xs font-bold text-slate-700 bg-slate-100/80 hover:bg-slate-200/80 rounded-full transition shadow-xs" type="button" data-action="exportLog">
+<svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+            导出离线报告
+          </button>
+<button class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white bg-[#ff5e36] hover:bg-[#b42901] rounded-full transition shadow-md shadow-[#ff5e36]/30 active:scale-[0.98]" type="button" data-action="versionInfo">当前版本说明</button>
+</div>
+</section>
+<!-- Filter Segmented Tabs & Category Pills (Matching reference's rounded pill selector) -->
+<section class="mb-8 flex flex-wrap items-center justify-between gap-4" data-purpose="category-filters">
+<div class="flex items-center bg-[#f1f4f9] p-1.5 rounded-full text-xs font-semibold text-slate-600 border border-slate-200/50 shadow-inner">
+<button class="px-4 py-2 rounded-full bg-white text-slate-900 shadow-pill-active font-bold transition" data-action="filterLog" data-filter="">全部更新</button>
+<button class="px-4 py-2 rounded-full hover:text-slate-900 transition" data-action="filterLog" data-filter="清晰">图片清晰度</button>
+<button class="px-4 py-2 rounded-full hover:text-slate-900 transition" data-action="filterLog" data-filter="转换">格式转换</button>
+<button class="px-4 py-2 rounded-full hover:text-slate-900 transition" data-action="filterLog" data-filter="整理">文件夹整理</button>
+<button class="px-4 py-2 rounded-full hover:text-slate-900 transition" data-action="filterLog" data-filter="灵动岛">灵动岛与动效</button>
+<button class="px-4 py-2 rounded-full hover:text-slate-900 transition" data-action="filterLog" data-filter="界面">体验优化</button>
+</div>
+<div class="text-xs text-slate-400 font-medium">本机版本记录</div>
+</section>
+<!-- BEGIN: TimelineContainer -->
+<div class="relative flex-1" data-purpose="changelog-timeline" id="changelog-content"></div>
+<!-- END: TimelineContainer -->
+</main>
+<!-- Footer Meta Bar (Clean Refined Pill Look) -->
+<footer class="h-11 border-t border-slate-100 bg-[#fafbfe] px-8 flex items-center justify-between text-xs text-slate-400 shrink-0 select-none"><span>本机版本记录 · v3.0.4</span></footer>
+</div>
+<!-- END: Main Content Area -->
+</div>
+
+
+<div id="toast" role="status"></div></body></html>
+
+
+
+
+
+
+
+

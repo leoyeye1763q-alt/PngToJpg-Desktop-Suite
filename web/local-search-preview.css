@@ -1,0 +1,12 @@
+.reference-preview{
+ display:block;
+ width:100%;
+ height:132px;
+ margin:0 auto 10px;
+ border-radius:12px;
+ background:var(--theme-surface-strong,#eef2f6);
+ object-fit:contain;
+ box-shadow:inset 0 0 0 1px var(--theme-border,#dbe2ea);
+}
+.reference-preview[hidden]{display:none}
+.image-drop:has(.reference-preview:not([hidden])) .drop-icon{display:none}

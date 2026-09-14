@@ -1,0 +1,55 @@
+const page=document.body.dataset.page;let state=null,first=true,queueKey='',selected=-1,mode='API 大模型清晰';
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const SAVED_KEY_MASK='************';
+function send(action,payload={}){const m={action,page,...payload};if(parent!==window)parent.postMessage(m,location.origin);else window.chrome?.webview?.postMessage(m);}
+function configStatus(message,kind){const el=$('#config-status');el.textContent=message;el.title=message;el.dataset.kind=kind;el.hidden=false;$$('[data-action=validateConfig],[data-action=saveConfig]').forEach(b=>b.disabled=kind==='pending');$('#testBtnText').textContent='检查配置格式';}
+function toast(t){$('#toast').textContent=t;$('#toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('#toast').style.display='none',5000)}
+const set=(id,value)=>{const el=$('#'+id);if(el&&document.activeElement!==el){if(el.type==='checkbox')el.checked=!!value;else el.value=value??''}};
+function config(){const c={};$$('[data-field]').forEach(e=>c[e.dataset.field]=e.value);const key=$('#apiKeyInput');c.ApiKey=key.dataset.saved==='true'?'':key.value;c.ClearKey=$('#clearKeyCheckbox').checked;return c}
+function options(){if(page==='clarity')return {mode,prompt:$('#prompt').value,format:$('#format').value,sameFolder:$('#sameFolder').checked,strength:$('#strength').value,scale:$('#scale').selectedIndex,imageType:$('#imageType').value};return {format:$('input[name=format]:checked')?.value||'jpg',size:window.sizeIndex??0,width:Number($('#width').value),height:Number($('#height').value),alpha:$('#alpha').checked,sameFolder:$('#sameFolder').checked,openFolder:$('#openFolder').checked}}
+function receive(s){if(s.type==='error'){configStatus(s.message,'error');return}if(s.type==='validated'){configStatus(s.message,'success');return}if(s.type==='saved'){configStatus('配置已保存','success');send('dismiss');return}if(s.type!=='state')return;state=s;
+ if(page==='settings'){if(first){$$('[data-field]').forEach(e=>e.value=s.config[e.dataset.field]??'');const key=$('#apiKeyInput');key.value=s.hasKey?SAVED_KEY_MASK:'';key.dataset.saved=String(!!s.hasKey);key.placeholder=s.hasKey?'密钥已加密保存；保留星号即继续使用':'输入 API Key';first=false}document.documentElement.dataset.ready='true';return}
+ const data=page==='clarity'?s.clarity:s.conversion;
+ if(first){if(page==='clarity'){mode=data.mode;set('prompt',s.config.Prompt);set('format',data.format);set('localMode',data.mode==='API 大模型清晰'?'保守清晰':data.mode);set('strength',data.strength);$('#scale').selectedIndex=data.scale;set('imageType',data.imageType)}else{$$('input[name=format]').forEach(e=>e.checked=e.value===data.format);set('width',data.width);set('height',data.height);set('alpha',data.alpha);set('openFolder',data.openFolder);window.sizeIndex=data.size}set('sameFolder',data.sameFolder);first=false}
+ const out=$('#output-path');if(out){if(out.tagName==='INPUT')out.value=data.output||'';else out.textContent=data.output||'保存到原图文件夹'}
+ const q=$('#queue');const key=JSON.stringify(data.items);if(q&&key!==queueKey){queueKey=key;q.replaceChildren();if(!data.items.length){const e=document.createElement(page==='conversion'?'tr':'div');e.innerHTML=page==='conversion'?'<td colspan="5" class="empty-queue">添加图片、PDF、Word 或 PPT 开始转换</td>':'<div class="empty-queue">添加图片开始清晰</div>';q.append(e)}data.items.forEach((item,i)=>{const row=document.createElement(page==='conversion'?'tr':'div');row.className=(page==='clarity'?'job ':'')+(i===selected?'selected':'');const check=document.createElement('input');check.type='checkbox';check.checked=item.checked;check.onclick=e=>e.stopPropagation();check.onchange=()=>send('check',{index:i,value:check.checked});if(page==='conversion'){for(const value of [null,item.name,item.dimensions,item.size,item.status]){const td=document.createElement('td');if(value===null)td.append(check);else td.textContent=value;td.className=value===item.name?'name':'';row.append(td)}}else{row.append(check);const name=document.createElement('span');name.className='name';name.textContent=item.name;const status=document.createElement('small');status.textContent=item.status;row.append(name,status)}row.onclick=()=>{selected=i;send('select',{index:i});queueKey=''};q.append(row)})}
+ const foot=$('#status-footer');if(foot){let info=$('.live-status');if(!info){const buttons=Array.from(foot.querySelectorAll('button'));foot.replaceChildren();info=document.createElement('span');info.className='live-status';const progress=document.createElement('progress');progress.className='live-progress';progress.max=100;foot.append(info,progress,...buttons)}info.textContent=data.status;$('.live-progress').value=data.progress}
+ $$('[data-action=start]').forEach(e=>e.disabled=data.busy);$$('[data-action=cancel]').forEach(e=>e.disabled=!data.busy);$$('[data-action=add],[data-action=clear]').forEach(e=>e.disabled=data.busy);
+ for(const side of ['original','result']){const el=$('#'+side+'-preview');if(el){if(data[side]){if(el.src!==data[side])el.src=data[side]}else el.removeAttribute('src')}}
+ if($('#model-summary'))$('#model-summary').textContent=s.config.Protocol+' / '+s.config.Model;if($('#queue-count'))$('#queue-count').textContent=data.items.length+' 项';
+ document.documentElement.dataset.ready='true';if(page==='clarity')updateMode();
+}
+function updateMode(){const api=mode==='API 大模型清晰';$('#prompt').closest('div.bg-surface-container-lowest').hidden=!api;$('.local-options').style.display=api?'none':'flex';$('#localMode').disabled=api;$$('[data-action=apiMode],[data-action=localMode]').forEach(e=>{const active=(e.dataset.action==='apiMode')===api;e.style.background=active?'white':'transparent';e.style.color=active?'#004ac6':'#434655'})}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action;
+ if(['conversion','clarity'].includes(a)){location.href=a+'.html';return}
+ if(a==='settings'){const frame=document.createElement('iframe');frame.id='api-frame';frame.src='settings.html';document.body.append(frame);return}
+ if(a==='closeSettings'){send('dismiss');return}
+ if(a==='saveConfig'||a==='validateConfig'){configStatus(a==='saveConfig'?'正在保存配置…':'正在检查配置格式…','pending');send(a,{config:config()});return}
+ if(a==='formatJson'){try{$('#jsonPayloadArea').value=JSON.stringify(JSON.parse($('#jsonPayloadArea').value),null,2);configStatus('JSON 格式化完成','success')}catch{configStatus('附加参数不是有效的 JSON，请检查引号、逗号和括号。','error')}return}
+ if(a==='preset'){const fields={Protocol:'OpenAI Images',Endpoint:'https://api.openai.com/v1/images/edits',Model:'gpt-image-2',AuthHeader:'Authorization',AuthPrefix:'Bearer ',ImageField:'image',ImageEncoding:'data-url',ResponseType:'base64',ResponsePath:'data.0.b64_json',TimeoutSeconds:300,FieldsJson:'{}'};$$('[data-field]').forEach(e=>{if(fields[e.dataset.field]!==undefined)e.value=fields[e.dataset.field]});$('#clearKeyCheckbox').checked=true;$('#apiKeyInput').value='';$('#apiKeyInput').dataset.saved='false';return}
+ if(a==='modelPreset'){$('#modelInput').value=b.textContent.trim()==='Nano Banana 2'?'gemini-3.1-flash-image':b.textContent.trim();return}
+ if(a==='pasteKey'){navigator.clipboard.readText().then(t=>{const key=$('#apiKeyInput');key.value=t;key.dataset.saved='false'}).catch(()=>toast('请在密钥输入框按 Ctrl+V 粘贴'));return}
+ if(a==='help'){toast('填写服务商完整图片接口地址；高级设置可配置鉴权、编码和返回字段。');return}
+ if(a==='all'){send('checkAll',{value:true});return}
+ if(a==='advanced'){const el=$('#advancedSettingsContent');el.hidden=!el.hidden;$('#accordionStatusBadge').textContent=el.hidden?'已收起高级字段':'已展开高级字段';return}
+ if(a==='toggleKey'){$('#apiKeyInput').type=$('#apiKeyInput').type==='password'?'text':'password';return}
+ if(a==='apiMode'||a==='localMode'){mode=a==='apiMode'?'API 大模型清晰':$('#localMode').value;updateMode();send('options',{options:options()});return}
+ if(a==='resetPrompt'){$('#prompt').value=state?.config.Prompt||'';return}
+ if(a.startsWith('prompt')){$('#prompt').value+=' '+b.textContent.trim().replace(/^\+\s*/,'');return}
+ if(['originalSize','square','wide','classic'].includes(a)){window.sizeIndex=a==='originalSize'?0:4;set('width',a==='wide'?1920:a==='classic'?1600:1650);set('height',a==='wide'?1080:a==='classic'?1200:1650);send('options',{options:options()});return}
+ if(a==='fit'||a==='zoom'){for(const el of $$('#original-preview,#result-preview')){el.style.maxWidth=a==='fit'?'100%':'none';el.style.maxHeight=a==='fit'?'100%':'none';el.parentElement.style.overflow='auto'}return}
+ if(a==='wipe'){const target=b;target.textContent='并排对比';toast('当前显示原图与结果的并排对比');return}
+ if(a==='lockRatio'){window.lockRatio=!window.lockRatio;b.title=window.lockRatio?'已锁定长宽比例':'锁定长宽比例';return}
+ if(a==='output'){document.querySelector('main select')?.focus();return}if(a==='search'){$('#search')?.focus();return}
+ send(a,{options:page==='settings'?{}:options()});
+});
+document.addEventListener('change',e=>{if(page==='settings'){if(e.target.id==='protocolSelect'){$('#clearKeyCheckbox').checked=true;$('#apiKeyInput').value='';$('#apiKeyInput').dataset.saved='false';toast('协议已切换，请填写对应地址与密钥')}return}if(['checkAll','toolbarAll'].includes(e.target.id)){send('checkAll',{value:e.target.checked});return}if(e.target.closest('#queue'))return;if(e.target.id==='localMode')mode=e.target.value;if(e.target.id==='width'||e.target.id==='height'){window.sizeIndex=4;if(window.lockRatio){const ratio=(state?.conversion.width||1)/(state?.conversion.height||1);set(e.target.id==='width'?'height':'width',Math.max(1,Math.round(Number(e.target.value)*(e.target.id==='width'?1/ratio:ratio))))}}send('options',{options:options()})});
+$('#search')?.addEventListener('input',e=>send('searchText',{value:e.target.value}));
+$('#apiKeyInput')?.addEventListener('input',e=>{if(e.target.value!==SAVED_KEY_MASK)e.target.dataset.saved='false'});
+window.addEventListener('message',e=>{if(e.origin!==location.origin)return;if(e.data.action==='dismiss'){$('#api-frame')?.remove();return}if(e.source===$('#api-frame')?.contentWindow){send(e.data.action,{config:e.data.config});return}receive(e.data)});
+window.chrome?.webview?.addEventListener('message',e=>{receive(e.data);$('#api-frame')?.contentWindow.postMessage(e.data,location.origin)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();send('dismiss')}});
+document.addEventListener('dragover',e=>e.preventDefault());document.addEventListener('drop',e=>{e.preventDefault();if(chrome.webview?.postMessageWithAdditionalObjects)chrome.webview.postMessageWithAdditionalObjects({action:'drop',page},Array.from(e.dataTransfer.files));else toast('请使用“添加图片”选择本地图片')});
+document.fonts.ready.then(()=>send('ready'));
+if(page==='settings'){$('#advancedSettingsContent').hidden=true;$('#accordionStatusBadge').textContent='已收起高级字段';const arrow=$('#accordionArrow');if(arrow&&!arrow.closest('[data-action]'))arrow.parentElement.dataset.action='advanced'}
+window.addEventListener('error',e=>{document.documentElement.dataset.ready='true';toast('界面加载错误：'+e.message);send('uiError',{message:e.message})});
