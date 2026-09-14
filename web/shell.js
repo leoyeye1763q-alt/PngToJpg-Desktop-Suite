@@ -29,7 +29,7 @@ window.addEventListener('message',event=>{
  if(m.action==='ready'){if(latestState)deliver(frame,latestState);return}
  if(m.action==='pageReady'){readyPages.add(frame.dataset.page);if(frame.dataset.page===requestedPage)navigatePage(requestedPage);return}
  if(m.action==='navigate'){navigatePage(m.target);return}
- if(m.action==='drop'&&m.files){window.chrome?.webview?.postMessageWithAdditionalObjects({action:'drop',page:frame.dataset.page},m.files);return}
+ if(m.action==='drop'&&m.files){window.chrome?.webview?.postMessageWithAdditionalObjects({action:'drop',page:frame.dataset.page,dropTarget:m.dropTarget||'page'},m.files);return}
  host({...m,page:frame.dataset.page});
 });
 window.chrome?.webview?.addEventListener('message',event=>{

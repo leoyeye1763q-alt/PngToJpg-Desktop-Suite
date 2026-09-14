@@ -1,0 +1,36 @@
+const {chromium}=require(process.env.PLAYWRIGHT_PATH||'playwright');
+const path=require('path');
+
+(async()=>{
+ const app=path.resolve(__dirname,'..');
+ const launchOptions={headless:true};
+ if(process.env.CHROME_PATH)launchOptions.executablePath=process.env.CHROME_PATH;
+ const browser=await chromium.launch(launchOptions);
+ const page=await browser.newPage({viewport:{width:1222,height:833}});
+ await page.route('https://pixflow.local/**',route=>route.fulfill({path:path.join(app,'web',new URL(route.request().url()).pathname)}));
+ await page.addInitScript(()=>{window.hostCalls=[];window.chrome={webview:{postMessage(message){hostCalls.push({kind:'message',message})},postMessageWithAdditionalObjects(message,files){hostCalls.push({kind:'drop',message,count:files.length})},addEventListener(type,callback){if(type==='message')window.hostMessage=callback}}}});
+ await page.goto('https://pixflow.local/index.html');
+ await page.waitForFunction(()=>typeof window.hostMessage==='function');
+ await page.waitForFunction(()=>document.querySelector('iframe[data-page=organizer]')?.contentDocument?.readyState==='complete');
+ const organizer=page.frames().find(frame=>frame.url().endsWith('/organizer.html'));
+ const queueState={items:[],busy:false,status:'就绪',progress:0,format:'jpg',size:0,width:1200,height:1200,alpha:false,sameFolder:true,openFolder:false,output:'',original:'',result:''};
+ const state={type:'state',conversion:queueState,clarity:{...queueState,mode:'保守清晰',strength:'标准',scale:2,imageType:'商品照片'},organizer:{enabled:false,path:'C:/fixture',pending:0,log:[],openSheet:true,targetScreenEnabled:false,targetScreen:1,screenCount:2,island:false,sheets:[],sheetStatus:'尚未添加文件夹',desktopScope:'left',desktopHistory:[]},imageLink:{limitReached:false,hasConfig:false,name:'',remainingBytes:0,remainingUploads:0,busy:false,status:'就绪',progress:0,result:{}},localSearch:{results:[],busy:false,mode:'number',query:'',threshold:0.9,status:'就绪',progress:0,scanned:0},config:{Protocol:'OpenAI Images',Model:'gpt-image-2',Prompt:''},hasKey:false};
+ await page.evaluate(value=>hostMessage({data:value}),state);
+ await page.evaluate(()=>navigatePage('organizer'));
+ await page.waitForFunction(()=>document.querySelector('iframe[data-page=organizer]')?.classList.contains('active'));
+ await organizer.locator('[data-action=spreadsheets]').click();
+ if(!await organizer.locator('#spreadsheet-dialog').evaluate(dialog=>dialog.open))throw Error('Spreadsheet dialog did not open');
+ const dataTransfer=await organizer.evaluateHandle(()=>{const transfer=new DataTransfer();transfer.items.add(new File(['folder'],'project-folder'));return transfer});
+ await organizer.dispatchEvent('#spreadsheet-dialog','drop',{dataTransfer});
+ const dialogDrop=await page.evaluate(()=>hostCalls.find(call=>call.kind==='drop'));
+ if(!dialogDrop||dialogDrop.message.page!=='organizer'||dialogDrop.message.dropTarget!=='spreadsheets')throw Error('Spreadsheet dialog drop was routed to organizer processing: '+JSON.stringify(dialogDrop));
+ await page.evaluate(()=>{hostCalls.length=0});
+ await page.evaluate(value=>hostMessage({data:{...value,organizer:{...value.organizer,sheets:['项目 A · 需求.xlsx · 已找到'],sheetStatus:'已添加 1 个文件夹，找到 1 个表格'}}}),state);
+ if(!await organizer.locator('#spreadsheet-list').textContent().then(text=>text.includes('项目 A')&&text.includes('需求.xlsx')))throw Error('Queued spreadsheet is not visible before opening');
+ await organizer.locator('[data-action=spreadsheetOpen]').click();
+ await page.waitForFunction(()=>hostCalls.some(call=>call.kind==='message'&&call.message.action==='spreadsheetOpen'));
+ const openCall=await page.evaluate(()=>hostCalls.find(call=>call.kind==='message'&&call.message.action==='spreadsheetOpen'));
+ if(!openCall)throw Error('Open-all button did not send the explicit open action: '+JSON.stringify(await page.evaluate(()=>hostCalls)));
+ await browser.close();
+ console.log('PASS: spreadsheet drops queue visibly and only the open-all button requests opening.');
+})().catch(error=>{console.error(error.stack);process.exit(1)});

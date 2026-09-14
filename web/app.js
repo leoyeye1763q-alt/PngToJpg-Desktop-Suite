@@ -95,7 +95,7 @@ document.addEventListener('click',e=>{
  if(action==='desktopOrganizerInfo'){$('#desktop-organizer-info-dialog').showModal();return}if(action==='dismissDesktopOrganizerInfo'){$('#desktop-organizer-info-dialog').close();return}
  if(action==='desktopProductUndo'){send(action,{recordId:b.dataset.recordId});return}
  if(action==='filterLog'){window.logFilter=b.dataset.filter;renderLog();$$('[data-action=filterLog]').forEach(x=>x.classList.toggle('active-filter',x===b));return}
- if(action==='versionInfo'){toast('当前安装 v3.0.4。本版本通过本机安装更新，未配置在线更新服务。');return}
+ if(action==='versionInfo'){toast('当前安装 v3.0.5。本版本通过本机安装更新，未配置在线更新服务。');return}
  if(action==='openR2Config'){$('#r2-config-dialog').showModal();return}
  if(action==='imageLinkSaveConfig'){send(action,{accountId:$('#link-account').value,bucket:$('#link-bucket').value,publicBaseUrl:$('#link-public-url').value,accessKey:$('#link-access-key').value,secretKey:$('#link-secret-key').value,clearCredentials:$('#link-clear-key').checked});return}
  if(action==='imageLinkStart'){send(action,{options:options()});return}
@@ -144,7 +144,7 @@ function hasDraggedFiles(e){return Array.from(e.dataTransfer?.types||[]).include
 function clearDropIndicator(){$('#queue-card')?.classList.remove('drop-active');$('#local-search-drop')?.classList.remove('drop-active')}
 window.addEventListener('dragover',e=>{if(!hasDraggedFiles(e))return;e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect='copy';$('#queue-card')?.classList.add('drop-active');$('#local-search-drop')?.classList.add('drop-active')},true);
 window.addEventListener('dragleave',e=>{if(!e.relatedTarget)clearDropIndicator()},true);
-window.addEventListener('drop',e=>{if(!hasDraggedFiles(e))return;e.preventDefault();e.stopPropagation();clearDropIndicator();const files=Array.from(e.dataTransfer.files);if(!files.length)return;if(parent!==window)send('drop',{files});else if(window.chrome?.webview?.postMessageWithAdditionalObjects)chrome.webview.postMessageWithAdditionalObjects({action:'drop',page},files);else toast('请通过添加按钮选择本地文件')},true);
+window.addEventListener('drop',e=>{if(!hasDraggedFiles(e))return;e.preventDefault();e.stopPropagation();clearDropIndicator();const files=Array.from(e.dataTransfer.files);if(!files.length)return;const dropTarget=page==='organizer'&&$('#spreadsheet-dialog')?.open?'spreadsheets':'page';if(parent!==window)send('drop',{files,dropTarget});else if(window.chrome?.webview?.postMessageWithAdditionalObjects)chrome.webview.postMessageWithAdditionalObjects({action:'drop',page,dropTarget},files);else toast('请通过添加按钮选择本地文件')},true);
 window.addEventListener('error',e=>{document.documentElement.dataset.ready='true';toast('界面错误：'+e.message);send('uiError',{message:e.message})});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#compare-container')?.classList.remove('expanded-preview');$('#api-frame')?.remove()}});
 send('ready');

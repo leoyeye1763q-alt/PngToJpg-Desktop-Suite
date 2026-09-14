@@ -84,7 +84,7 @@
    renderLocalSearch({...state.localSearch,busy:true,progress:0,scanned:42,status:'正在比较第 42 张图片 · fixture.png',results:[]});if(!document.querySelector('#local-search-progress').classList.contains('is-indeterminate')||!document.querySelector('.search-spinner')||!document.querySelector('.search-actions').classList.contains('is-running'))throw Error('Local search activity indicator missing');renderLocalSearch(state.localSearch);
   }else if(page==='changelog'){
    await wait(()=>document.querySelectorAll('.release-card').length>0);
-   if(!document.querySelector('#changelog-content').textContent.includes('v3.0.4'))throw Error('Current release missing');
+   if(!document.querySelector('#changelog-content').textContent.includes('v3.0.5'))throw Error('Current release missing');
   }else if(page==='preferences'){
    const reference=JSON.parse(localStorage.getItem('referenceOrganizerSidebarFingerprint')||'null'),sidebarCurrent=sidebarFingerprint();if(!reference||!sameSidebarStructure(reference,sidebarCurrent))throw Error('Preferences sidebar geometry differs from organizer page');
    const themeOptions=Array.from(document.querySelectorAll('[data-theme-option]'));if(themeOptions.length!==6||document.querySelector('[data-field]')||document.querySelector('#api-frame'))throw Error('Preferences theme choices are incomplete');

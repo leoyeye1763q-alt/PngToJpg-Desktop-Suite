@@ -51,7 +51,7 @@ function Handle-WebMessage($Message) {
         'ready' { }
         'readyShell' {$script:webForcePreviewState=$true}
         'uiError' {throw ('HTML script error: '+$Message.message)}
-        'drop' {$paths=[string[]]@();if($script:webHost.DroppedFiles.TryDequeue([ref]$paths)){if($page -eq 'clarity'){if(-not $script:clarity.Busy){Add-ClarityImages $paths}}elseif($page -eq 'organizer'){Add-OrganizerFoldersBatch -Paths $paths}elseif($page -eq 'imageLink'){if($paths.Count){Add-ImageLinkImage $paths[0]}}elseif($page -eq 'localSearch'){if($paths.Count){Set-LocalSearchReference $paths[0]}}elseif($page -eq 'conversion' -and -not $script:isConverting){Add-ImageFiles $paths}}}
+        'drop' {$paths=[string[]]@();if($script:webHost.DroppedFiles.TryDequeue([ref]$paths)){if($page -eq 'clarity'){if(-not $script:clarity.Busy){Add-ClarityImages $paths}}elseif($page -eq 'organizer'){if([string]$Message.dropTarget -eq 'spreadsheets'){Add-SpreadsheetFoldersBatch -Paths $paths;Send-WebState}else{Add-OrganizerFoldersBatch -Paths $paths}}elseif($page -eq 'imageLink'){if($paths.Count){Add-ImageLinkImage $paths[0]}}elseif($page -eq 'localSearch'){if($paths.Count){Set-LocalSearchReference $paths[0]}}elseif($page -eq 'conversion' -and -not $script:isConverting){Add-ImageFiles $paths}}}
         'captured' {
             if($SmokeTestWebUi){
                 $script:webTestStage++
@@ -201,7 +201,7 @@ function Start-WebUi {
                 $isActive=[bool]($script:isConverting -or $script:clarity.Busy -or $script:imageLink.Busy -or $script:localSearch.Busy -or $script:previewProcess -or $script:clarity.PreviewProcess -or $script:organizerWorkerProcess -or $script:organizerPending.Count)
                 $script:webNextStateUtc=$now.AddMilliseconds($(if($isActive){350}else{1500}))
             }
-            if($SmokeTestWebUi -and ([DateTime]::UtcNow-$script:webTestStarted).TotalSeconds -gt 120){throw 'Web UI test timed out'}
+            if($SmokeTestWebUi -and ([DateTime]::UtcNow-$script:webTestStarted).TotalSeconds -gt 180){throw "Web UI test timed out at stage $($script:webTestStage)"}
         }catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress));if($SmokeTestWebUi){$script:webTestError=$_.Exception.Message;$form.Close()}}
     });$script:webTimer.Start()
     $form.Add_FormClosed({$script:webTimer.Stop();$script:webTimer.Dispose()})

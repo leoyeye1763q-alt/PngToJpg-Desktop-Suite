@@ -44,7 +44,7 @@
 <img class="brand-companion" src="assets/brand-companion.jpg" alt="蟑螂强副图">
 <div>
 <h2 class="text-sm font-bold tracking-tight text-white leading-tight">蟑螂强</h2>
-<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.4</p>
+<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.5</p>
 </div>
 </div>
 <!-- Unified 6-item Navigation -->
@@ -110,7 +110,7 @@
 </nav>
 </div>
 <!-- 底部守护服务状态小卡片 -->
-<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.4</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
+<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.5</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
 </aside>
 <!-- END: Left Floating Dark Pill Sidebar -->
 <!-- BEGIN: Main White Floating Card Container -->
@@ -297,7 +297,7 @@
 </section>
 <!-- END: 实时整理控制台与流水线日志 -->
 </div>
-<dialog id="spreadsheet-dialog"><h2>批量打开表格</h2><p>添加父目录下的项目文件夹，检查队列后打开表格。</p><div class="dialog-actions"><button data-action="spreadsheetAdd">添加父目录…</button><button data-action="spreadsheetClear">清空列表</button><button data-action="spreadsheetOpen" class="primary">打开全部表格</button><button data-action="dismissSheet">返回</button></div><div id="spreadsheet-list"></div><p id="spreadsheet-status"></p></dialog>
+<dialog id="spreadsheet-dialog"><h2>批量打开表格</h2><p>拖入或添加文件夹后会先显示待打开表格，不会自动打开。确认列表后点击“打开全部表格”。</p><div class="dialog-actions"><button data-action="spreadsheetAdd">添加父目录…</button><button data-action="spreadsheetClear">清空列表</button><button data-action="spreadsheetOpen" class="primary">打开全部表格</button><button data-action="dismissSheet">返回</button></div><div id="spreadsheet-list" aria-live="polite"></div><p id="spreadsheet-status" aria-live="polite"></p></dialog>
 <dialog id="desktop-organizer-info-dialog"><h2>桌面成品自动整理说明</h2><p>这个功能不会后台自动运行，只有点击“自动整理桌面”才会生效。</p><p>先按选择的“屏幕左侧 / 中间 / 右侧 / 全局”读取桌面图标位置。所选区域内必须恰好有一个 PSD 或 PSB；它的文件名就是商品编号，例如 123.psd 对应编号 123。</p><p>程序会查找编号母文件夹：PSD 放到 123 母文件夹第一层；“主图+数字”“副图+数字”“A+数字”的图片放到 123\123；ChatGPT Image、生成图片等其他图片放到 123\素材；123 源文件完全不处理。</p><p>若 PSD 不唯一、母文件夹不唯一、读不到图标位置或目标不明确，程序会停止而不猜测。同名文件不会覆盖，会自动加序号。每次整理会生成一条可点击恢复的记录，保存 30 天，互不阻塞后续整理。</p><div class="dialog-actions"><button data-action="dismissDesktopOrganizerInfo" class="primary">我知道了</button></div></dialog></main>
 <!-- END: Main White Floating Card Container -->
 </div>
