@@ -1,6 +1,6 @@
 'use strict';
 const page=document.body.dataset.page;
-let state=null,first=true,selected=-1,lastQueue='',lastLog='',zoom=1,renderedQueueLength=0;
+let state=null,first=true,selected=-1,lastQueue='',lastLog='',zoom=1,renderedQueueLength=0,lastOrganizerEnabled=null;
 const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
 function send(action,payload={}){const message={action,page,...payload};if(parent!==window)parent.postMessage(message,location.origin);else window.chrome?.webview?.postMessage(message)}
 function toast(message){$('#toast').textContent=message;$('#toast').style.display='block';clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('#toast').style.display='none',6000)}
@@ -69,7 +69,8 @@ function receive(s){
  if(page==='organizer'){
   set('organizer-path',s.organizer.path);text('organizer-note','仅监控指定目录：'+s.organizer.path);text('organizer-badge',s.organizer.enabled?'后台监控已启动':'后台监控已停止');text('organizer-status',s.organizer.enabled?'正在监控，等待文件下载稳定':'自动监控未启动');text('organizer-pending','待处理 '+s.organizer.pending+' 项');
   set('organizerOpenSheet',s.organizer.openSheet);set('organizerTargetScreenEnabled',s.organizer.targetScreenEnabled);set('organizerTargetScreen',s.organizer.targetScreen);set('organizerIsland',s.organizer.island);if($('#organizerTargetScreen')){$('#organizerTargetScreen').disabled=!s.organizer.targetScreenEnabled;const second=$('#organizerTargetScreen option[value="2"]');if(second)second.disabled=s.organizer.screenCount<2}
-  $$('[data-action=organizerStart]').forEach(e=>e.disabled=s.organizer.enabled);$$('[data-action=organizerStop]').forEach(e=>e.disabled=!s.organizer.enabled);$$('[data-action=organizerBrowse]').forEach(e=>e.disabled=s.organizer.enabled);
+  $$('[data-action=organizerStart]').forEach(e=>{e.disabled=false;e.classList.remove('is-starting');e.classList.toggle('is-active',s.organizer.enabled);e.setAttribute('aria-pressed',String(s.organizer.enabled));e.title=s.organizer.enabled?'自动监控已开启，点击可再次确认状态':'点击启动自动监控';e.querySelector('.organizer-start-play')?.classList.toggle('hidden',s.organizer.enabled);e.querySelector('.organizer-start-check')?.classList.toggle('hidden',!s.organizer.enabled);const label=e.querySelector('.organizer-start-label');if(label)label.textContent=s.organizer.enabled?'监控已开启':'启动自动监控'});$$('[data-action=organizerStop]').forEach(e=>e.disabled=!s.organizer.enabled);$$('[data-action=organizerBrowse]').forEach(e=>e.disabled=s.organizer.enabled);
+  if(lastOrganizerEnabled!==null&&lastOrganizerEnabled!==s.organizer.enabled)toast(s.organizer.enabled?'自动监控已开启':'自动监控已停止');lastOrganizerEnabled=s.organizer.enabled;
   set('desktop-organize-scope',s.organizer.desktopScope);renderDesktopHistory(s.organizer.desktopHistory||[]);
   const key=JSON.stringify(s.organizer.log);if(key!==lastLog){lastLog=key;$('#organizer-log').replaceChildren(...s.organizer.log.map(line=>{const p=document.createElement('p');p.textContent=line;return p}));if(!s.organizer.log.length)text('organizer-log','暂无整理记录')}
   $('#spreadsheet-list').replaceChildren(...s.organizer.sheets.map(item=>{const p=document.createElement('p');p.textContent=item;return p}));text('spreadsheet-status',s.organizer.sheetStatus);
@@ -94,8 +95,9 @@ document.addEventListener('click',e=>{
  if(action==='spreadsheets'){$('#spreadsheet-dialog').showModal();return}if(action==='dismissSheet'){$('#spreadsheet-dialog').close();return}
  if(action==='desktopOrganizerInfo'){$('#desktop-organizer-info-dialog').showModal();return}if(action==='dismissDesktopOrganizerInfo'){$('#desktop-organizer-info-dialog').close();return}
  if(action==='desktopProductUndo'){send(action,{recordId:b.dataset.recordId});return}
+ if(action==='organizerStart'){if(state?.organizer.enabled){toast('自动监控已在运行');return}b.classList.remove('is-active');b.classList.add('is-starting');const label=b.querySelector('.organizer-start-label');if(label)label.textContent='正在启动…';send(action,{options:options()});return}
  if(action==='filterLog'){window.logFilter=b.dataset.filter;renderLog();$$('[data-action=filterLog]').forEach(x=>x.classList.toggle('active-filter',x===b));return}
- if(action==='versionInfo'){toast('当前安装 v3.0.5。本版本通过本机安装更新，未配置在线更新服务。');return}
+ if(action==='versionInfo'){toast('当前安装 v3.0.6。本版本通过本机安装更新，未配置在线更新服务。');return}
  if(action==='openR2Config'){$('#r2-config-dialog').showModal();return}
  if(action==='imageLinkSaveConfig'){send(action,{accountId:$('#link-account').value,bucket:$('#link-bucket').value,publicBaseUrl:$('#link-public-url').value,accessKey:$('#link-access-key').value,secretKey:$('#link-secret-key').value,clearCredentials:$('#link-clear-key').checked});return}
  if(action==='imageLinkStart'){send(action,{options:options()});return}

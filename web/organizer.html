@@ -32,7 +32,11 @@
     .desktop-history-row{width:100%;display:grid;grid-template-columns:minmax(130px,.8fr) minmax(180px,1.5fr) auto;align-items:center;gap:14px;padding:10px 12px;border:1px solid var(--theme-border);border-radius:14px;background:var(--theme-surface);text-align:left;transition:border-color .15s,box-shadow .15s,transform .15s}
     .desktop-history-row:hover{border-color:var(--theme-accent);box-shadow:0 7px 18px color-mix(in srgb,var(--theme-accent) 13%,transparent);transform:translateY(-1px)}.desktop-history-row strong{display:block;color:var(--theme-text);font-size:12px}.desktop-history-row small{display:block;margin-top:3px;color:var(--theme-muted);font-size:10px}.desktop-history-path{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--theme-muted);font-size:11px}.desktop-history-restore{padding:6px 11px;border-radius:999px;background:var(--theme-accent);color:var(--theme-on-accent);font-size:11px;font-weight:800}
 </style>
-<link rel="stylesheet" href="organizer.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><script src="theme.js"></script><script defer="" src="app.js"></script></head>
+<link rel="stylesheet" href="organizer.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><style>
+button[data-action="organizerStart"].is-starting{background:#f59e0b!important;box-shadow:0 8px 20px -4px rgba(245,158,11,.4)!important}
+button[data-action="organizerStart"].is-active{background:#10b981!important;box-shadow:0 8px 20px -4px rgba(16,185,129,.42)!important;cursor:pointer}
+button[data-action="organizerStart"].is-active:hover{background:#059669!important}
+</style><script src="theme.js"></script><script defer="" src="app.js"></script></head>
 <body class="desktop-body" style="" data-page="organizer">
 <!-- BEGIN: Workspace Wrapper with Floating Sidebar & White Main Card -->
 <div id="window-bar"><span class="window-drag"><img class="titlebar-logo" src="assets/app-icon.ico" alt=""><span>蟑螂强</span></span><button data-action="minimize" title="最小化">−</button><button data-action="maximize" title="最大化">□</button><button data-action="close" title="关闭">×</button></div><div class="w-full h-full max-w-[1480px] max-h-[880px] flex items-stretch gap-5" id="desktop-shell">
@@ -44,7 +48,7 @@
 <img class="brand-companion" src="assets/brand-companion.jpg" alt="蟑螂强副图">
 <div>
 <h2 class="text-sm font-bold tracking-tight text-white leading-tight">蟑螂强</h2>
-<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.5</p>
+<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.6</p>
 </div>
 </div>
 <!-- Unified 6-item Navigation -->
@@ -110,7 +114,7 @@
 </nav>
 </div>
 <!-- 底部守护服务状态小卡片 -->
-<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.5</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
+<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.6</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
 </aside>
 <!-- END: Left Floating Dark Pill Sidebar -->
 <!-- BEGIN: Main White Floating Card Container -->
@@ -132,12 +136,13 @@
 </svg>
           批量打开表格
         </button>
-<button class="inline-flex items-center px-5 py-2.5 rounded-full text-xs font-bold text-white bg-[#ff5e36] hover:bg-[#e04822] shadow-orange-glow active:scale-[0.98] transition" type="button" data-action="organizerStart">
-<svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<button class="inline-flex items-center px-5 py-2.5 rounded-full text-xs font-bold text-white bg-[#ff5e36] hover:bg-[#e04822] shadow-orange-glow active:scale-[0.98] transition" type="button" data-action="organizerStart" aria-pressed="false" title="点击启动自动监控">
+<svg class="organizer-start-play w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
 <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" stroke-linecap="round" stroke-linejoin="round"></path>
 <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
 </svg>
-          启动自动监控
+<svg class="organizer-start-check hidden w-4 h-4 mr-1.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12.5l4 4L19 7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+<span class="organizer-start-label">启动自动监控</span>
         </button>
 </div>
 </header>
