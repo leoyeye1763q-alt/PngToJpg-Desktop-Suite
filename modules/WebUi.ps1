@@ -43,7 +43,7 @@ function Send-WebState([switch]$IncludePreviews) {
         if($IncludePreviews -or $changed){$pair[2][$pair[1]]=$script:webPreviewCache[$key].Data}
     }
     $organizerState=@{enabled=[bool]$script:organizerEnabled;path=$organizerPathBox.Text;pending=$script:organizerPending.Count;log=@($script:organizerLog);openSheet=$script:organizerOpenSpreadsheetEnabled;targetScreenEnabled=$script:organizerSpreadsheetScreenEnabled;targetScreen=($script:organizerSpreadsheetScreenIndex+1);screenCount=@([Windows.Forms.Screen]::AllScreens).Count;island=$script:dynamicIslandEnabled;sheets=@($spreadsheetList.Items|ForEach-Object {($_.SubItems|ForEach-Object Text)-join ' · '});sheetStatus=$spreadsheetStatus.Text;desktopScope=[string]$script:desktopOrganizeScope;desktopHistory=@(Get-DesktopOrganizationHistory -HistoryPath $script:desktopProductHistoryPath -RetentionDays 30)}
-    $script:webHost.Send((@{type='state';conversion=$conversion;clarity=$clarityState;organizer=$organizerState;imageLink=(Get-ImageLinkWebState);localSearch=(Get-LocalSearchWebState);changelog=$script:webChangelog;config=$config;hasKey=[bool]$script:imageApiConfig.ProtectedKey}|ConvertTo-Json -Depth 8 -Compress))
+    $script:webHost.Send((@{type='state';conversion=$conversion;clarity=$clarityState;organizer=$organizerState;imageLink=(Get-ImageLinkWebState);localSearch=(Get-LocalSearchWebState);photoshop=(Get-PhotoshopAssistantWebState);changelog=$script:webChangelog;config=$config;hasKey=[bool]$script:imageApiConfig.ProtectedKey}|ConvertTo-Json -Depth 8 -Compress))
 }
 function Handle-WebMessage($Message) {
     $page=[string]$Message['page']
@@ -55,17 +55,17 @@ function Handle-WebMessage($Message) {
         'captured' {
             if($SmokeTestWebUi){
                 $script:webTestStage++
-                if($script:webTestStage -lt 7){[void]$script:webHost.CoreWebView2.ExecuteScriptAsync("navigatePage('$(@('conversion','clarity','organizer','imageLink','localSearch','changelog','preferences')[$script:webTestStage])')")}
-                elseif($script:webTestStage -eq 7){$script:webTestLaunchedStage=7;[void]$script:webHost.CoreWebView2.ExecuteScriptAsync((Get-Content (Join-Path $PSScriptRoot '..\tests\Settings.Nested.Smoke.js') -Raw))}
-                else{$form.Close();Write-Host 'WebView2: conversion, clarity, organizer, image link, local search, changelog, preferences and clarity API settings passed.'}
+                if($script:webTestStage -lt 8){[void]$script:webHost.CoreWebView2.ExecuteScriptAsync("navigatePage('$(@('conversion','clarity','organizer','imageLink','localSearch','photoshop','changelog','preferences')[$script:webTestStage])')")}
+                elseif($script:webTestStage -eq 8){$script:webTestLaunchedStage=8;[void]$script:webHost.CoreWebView2.ExecuteScriptAsync((Get-Content (Join-Path $PSScriptRoot '..\tests\Settings.Nested.Smoke.js') -Raw))}
+                else{$form.Close();Write-Host 'WebView2: conversion, clarity, organizer, image link, local search, Photoshop assistant, changelog, preferences and clarity API settings passed.'}
             }
         }
         'uiCheck' {
             if($SmokeTestWebUi){
-                if($page -ne @('conversion','clarity','organizer','imageLink','localSearch','changelog','preferences','settings')[$script:webTestStage] -or $script:webCaptureStage -eq $script:webTestStage){return}
+                if($page -ne @('conversion','clarity','organizer','imageLink','localSearch','photoshop','changelog','preferences','settings')[$script:webTestStage] -or $script:webCaptureStage -eq $script:webTestStage){return}
                 if(-not $Message.ok){$script:webTestError=[string]$Message.detail;$form.Close();return}
                 $script:webCaptureStage=$script:webTestStage
-                $script:webHost.CapturePage((Join-Path $script:webArtifactDirectory (@('web-conversion.png','web-clarity.png','web-organizer.png','web-image-link.png','web-local-search.png','web-changelog.png','web-preferences.png','web-settings.png')[$script:webTestStage])))
+                $script:webHost.CapturePage((Join-Path $script:webArtifactDirectory (@('web-conversion.png','web-clarity.png','web-organizer.png','web-image-link.png','web-local-search.png','web-photoshop.png','web-changelog.png','web-preferences.png','web-settings.png')[$script:webTestStage])))
             }
         }
         'options' {Set-WebOptions $Message.options $page}
@@ -100,6 +100,12 @@ function Handle-WebMessage($Message) {
         'localSearchClear' {Clear-LocalSearch}
         'localSearchOpenFile' {try{Open-LocalSearchResult ([int]$Message.index)}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
         'localSearchOpenFolder' {try{Open-LocalSearchResult ([int]$Message.index) -Folder}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'photoshopOptions' {Set-PhotoshopAssistantOptions $Message.options}
+        'photoshopDetect' {try{Start-PhotoshopDetection}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'photoshopRefresh' {try{Start-PhotoshopDetection}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'photoshopBrowseOutput' {try{Select-PhotoshopOutputDirectory $form}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'photoshopExport' {try{Start-PhotoshopExport $Message.options}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'photoshopOpenOutput' {try{Open-PhotoshopOutputDirectory}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
         'organizerBrowse' {if(-not $script:organizerEnabled){Invoke-WebControlClick $organizerPathBrowseButton}}
         'organizerStart' {if(-not $script:organizerEnabled){[void](Start-DesktopOrganizer -Path $organizerPathBox.Text)}}
         'organizerStop' {Stop-DesktopOrganizer}
@@ -156,6 +162,7 @@ function Start-WebUi {
         $script:localSearch.Root=$script:dataDirectory;$script:localSearch.Query='ABC123';$script:localSearch.Status='离线界面测试：找到 3 项';$script:localSearch.Progress=100
         $script:localSearch.ReferencePath=$fixture;$script:localSearch.ReferenceName='web-fixture.png';$script:localSearch.ReferencePreview=Get-LocalSearchReferencePreview $fixture
         $script:localSearch.Results=@([PSCustomObject]@{Name='ABC123';Path=(Join-Path $script:dataDirectory 'ABC123');RelativePath='商品\ABC123';Kind='文件夹';Size=0;IsDirectory=$true;Similarity=100;Exact=$true;Preview=''},[PSCustomObject]@{Name='ABC123_主图.jpg';Path=(Join-Path $script:dataDirectory 'ABC123_主图.jpg');RelativePath='商品\ABC123_主图.jpg';Kind='JPG';Size=245760;IsDirectory=$false;Similarity=100;Exact=$true;Preview=(Get-WebPreview $previewBox)},[PSCustomObject]@{Name='ABC123_副图.png';Path=(Join-Path $script:dataDirectory 'ABC123_副图.png');RelativePath='商品\ABC123_副图.png';Kind='PNG';Size=181240;IsDirectory=$false;Similarity=96.8;Exact=$false;Preview=(Get-WebPreview $previewBox)})
+        $script:photoshopAssistant.Running=$true;$script:photoshopAssistant.Detected=$true;$script:photoshopAssistant.Version='26.5.0';$script:photoshopAssistant.VersionLabel='Photoshop 2025 (26.5.0)';$script:photoshopAssistant.ProcessId=24680;$script:photoshopAssistant.FileName='ABC123.psd';$script:photoshopAssistant.PsdPath=(Join-Path $script:dataDirectory 'ABC123.psd');$script:photoshopAssistant.Width=1650;$script:photoshopAssistant.Height=1650;$script:photoshopAssistant.Saved=$true;$script:photoshopAssistant.Status='已读取当前 Photoshop 文件';$script:photoshopAssistant.OutputFiles=@()
         $openFolderCheck.Checked=$false
         $script:organizerPath=Join-Path $script:dataDirectory 'MonitorFixture';[void][IO.Directory]::CreateDirectory($script:organizerPath);$organizerPathBox.Text=$script:organizerPath
         $historyFixtureId=New-DesktopOrganizationRecordId;$historyFixture=[PSCustomObject]@{Version=2;RecordId=$historyFixtureId;CreatedAt=[DateTimeOffset]::Now.ToString('o');DesktopPath=$script:dataDirectory;Code='ABC123';ProjectFolder=$script:organizerPath;CreatedDirectories=@();Moves=@()};Save-DesktopOrganizationManifest -Path (Join-Path $script:desktopProductHistoryPath ($historyFixtureId+'.json')) -Manifest $historyFixture
@@ -183,11 +190,11 @@ function Start-WebUi {
             $message='';while($script:webHost.Messages.TryDequeue([ref]$message)) {
                 $handledMessage=$true
                 $parsed=$message|ConvertFrom-Json -AsHashtable
-                if($SmokeTestWebUi -and $parsed.action -eq 'ready' -and $script:webTestLaunchedStage -ne $script:webTestStage -and $parsed.page -eq @('conversion','clarity','organizer','imageLink','localSearch','changelog','preferences','settings')[$script:webTestStage]){
+                if($SmokeTestWebUi -and $parsed.action -eq 'ready' -and $script:webTestLaunchedStage -ne $script:webTestStage -and $parsed.page -eq @('conversion','clarity','organizer','imageLink','localSearch','photoshop','changelog','preferences','settings')[$script:webTestStage]){
                     $script:webTestLaunchedStage=$script:webTestStage
                     Send-WebState -IncludePreviews
                     $testCode=Get-Content (Join-Path $PSScriptRoot '..\tests\WebUi.Smoke.js') -Raw
-                    if($script:webTestStage -lt 7){$testCode="document.querySelector('iframe.active').contentWindow.eval("+($testCode|ConvertTo-Json -Compress)+")"}
+                    if($script:webTestStage -lt 8){$testCode="document.querySelector('iframe.active').contentWindow.eval("+($testCode|ConvertTo-Json -Compress)+")"}
                     [void]$script:webHost.CoreWebView2.ExecuteScriptAsync($testCode)
                 }
                 Handle-WebMessage $parsed
@@ -195,10 +202,11 @@ function Start-WebUi {
             $now=[DateTime]::UtcNow
             Poll-ImageLinkUpload
             Poll-LocalSearch
+            Poll-PhotoshopAssistant
             if($handledMessage -or $now -ge $script:webNextStateUtc){
                 Send-WebState -IncludePreviews:$script:webForcePreviewState
                 $script:webForcePreviewState=$false
-                $isActive=[bool]($script:isConverting -or $script:clarity.Busy -or $script:imageLink.Busy -or $script:localSearch.Busy -or $script:previewProcess -or $script:clarity.PreviewProcess -or $script:organizerWorkerProcess -or $script:organizerPending.Count)
+                $isActive=[bool]($script:isConverting -or $script:clarity.Busy -or $script:imageLink.Busy -or $script:localSearch.Busy -or $script:photoshopAssistant.Busy -or $script:previewProcess -or $script:clarity.PreviewProcess -or $script:organizerWorkerProcess -or $script:organizerPending.Count)
                 $script:webNextStateUtc=$now.AddMilliseconds($(if($isActive){350}else{1500}))
             }
             if($SmokeTestWebUi -and ([DateTime]::UtcNow-$script:webTestStarted).TotalSeconds -gt 180){throw "Web UI test timed out at stage $($script:webTestStage)"}

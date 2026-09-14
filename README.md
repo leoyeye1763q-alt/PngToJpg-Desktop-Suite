@@ -1,6 +1,6 @@
 # 蟑螂强 Desktop Suite
 
-一款面向 Windows 的本地图片处理与文件整理桌面工具。当前开源版本为 v3.0.7。
+一款面向 Windows 的本地图片处理与文件整理桌面工具。当前开源版本为 v3.0.8。
 
 ## 功能
 
@@ -10,6 +10,7 @@
 - 钉钉下载文件夹后台监控与批量整理
 - 按 PSD/PSB 编号整理桌面成品并提供 30 天逐次恢复
 - 图片转链接、本地文件名搜索与相似图片搜索
+- 完全离线的本地 Photoshop 助手，通过临时 JSX 检测活动 PSD 并导出 JPG、PNG、PSD 副本
 - 七套界面主题（新增液态水晶玻璃）和多屏表格打开位置选择
 
 默认图片转换、文件夹整理和本地搜索都在本机完成。只有用户主动选择 API 清晰或图片转链接并执行上传时，文件才会发送到用户配置的服务。
@@ -38,10 +39,12 @@
 
 ```powershell
 pwsh -NoProfile -File .\tests\FolderOrganizer.Tests.ps1
+pwsh -NoProfile -File .\tests\PhotoshopAssistant.Tests.ps1
 pwsh -NoProfile -File .\PngToJpg.ps1 -SmokeTestWebUi
 ```
 
 Web UI 冒烟测试需要 WebView2 SDK 文件已放入 `tools\webview2`。
+Photoshop 集成测试需要本机已启动 Photoshop；模块本身不连接网络或上传文件。
 
 ## 隐私与配置
 

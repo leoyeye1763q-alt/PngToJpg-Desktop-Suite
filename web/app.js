@@ -11,6 +11,7 @@ function options(){
  if(page==='conversion')return {format:$('#format').value,size:Number($('#size').value),width:Number($('#width').value),height:Number($('#height').value),alpha:$('#alpha').checked,sameFolder:$('#sameFolder').checked,openFolder:$('#openFolder').checked,customNameEnabled:$('#customNameEnabled').checked,namePrefix:$('#namePrefix').value,nameSuffix:Math.max(1,Number($('#nameSuffix').value)||1)};
  if(page==='imageLink')return {resize:$('#link-resize').checked,width:Number($('#link-width').value),height:Number($('#link-height').value),keepRatio:$('#link-ratio').checked};
  if(page==='localSearch')return {mode:$('#search-mode').value,query:$('#search-query').value,threshold:Number($('#search-threshold').value)};
+ if(page==='photoshop')return {formats:$$('[data-photoshop-format]:checked').map(e=>e.value),jpgQuality:Number($('#photoshop-jpg-quality').value),preserveTransparency:$('#photoshop-preserve-transparency').checked,outputMode:$('[name=photoshop-output]:checked')?.value||'current',outputPath:$('#photoshop-output-path').value};
  return {};
 }
 function renderImageLink(data){
@@ -35,6 +36,13 @@ function renderLocalSearch(data){
   const info=document.createElement('div');info.className='result-info';const name=document.createElement('strong');name.textContent=result.Name;name.title=result.Path;const relative=document.createElement('small');relative.textContent=result.RelativePath;relative.title=result.Path;const meta=document.createElement('div');meta.className='result-meta';const kind=document.createElement('span');kind.textContent=result.Kind;meta.append(kind);if(!isDirectory){const size=document.createElement('span');size.textContent=formatFileSize(result.Size);meta.append(size)}if(data.mode==='image'){const score=document.createElement('span');score.className=result.Exact?'exact':'similar';score.textContent=result.Exact?'完全一致':`${result.Similarity}% 相似`;meta.append(score)}info.append(name,relative,meta);
   const actions=document.createElement('div');actions.className='result-actions';for(const [label,action] of [[isDirectory?'打开文件夹':'打开文件','localSearchOpenFile'],['所在文件夹','localSearchOpenFolder']]){const button=document.createElement('button');button.textContent=label;button.dataset.action=action;button.dataset.index=index;actions.append(button)}row.append(visual,info,actions);target.append(row)});
  $$('[data-action=localSearchStart],[data-action=localSearchBrowseRoot],[data-action=localSearchChooseImage],[data-action=localSearchClear]').forEach(e=>e.disabled=data.busy);$$('[data-action=localSearchCancel]').forEach(e=>e.disabled=!data.busy);$('#search-mode').disabled=data.busy;$('#search-query').disabled=data.busy;$('#search-threshold').disabled=data.busy;
+ document.documentElement.dataset.ready='true';if(!window.pageAnnounced){window.pageAnnounced=true;send('pageReady')}
+}
+function renderPhotoshop(data){
+ if(first){set('photoshop-jpg-quality',data.JpgQuality);set('photoshop-preserve-transparency',data.PreserveTransparency);set('photoshop-output-path',data.OutputPath);const output=$(`[name=photoshop-output][value=${data.OutputMode||'current'}]`);if(output)output.checked=true;for(const box of $$('[data-photoshop-format]'))box.checked=(data.Formats||[]).includes(box.value);first=false}
+ text('photoshop-version',data.VersionLabel||'尚未检测');text('photoshop-file',data.FileName||'未检测到活动文件');text('photoshop-path',data.PsdPath||'—');text('photoshop-size',data.Width&&data.Height?`${data.Width} × ${data.Height} px`:'—');text('photoshop-status',data.Status||'等待操作');text('photoshop-quality-value',String(data.JpgQuality||10));
+ const badge=$('#photoshop-running-badge');badge.textContent=data.Running?'Photoshop 已运行':'Photoshop 未运行';badge.classList.toggle('offline',!data.Running);$('#photoshop-output-path').disabled=data.OutputMode!=='custom'||data.Busy;$$('[data-action=photoshopBrowseOutput]').forEach(e=>e.disabled=data.OutputMode!=='custom'||data.Busy);$$('[data-action=photoshopDetect],[data-action=photoshopRefresh]').forEach(e=>e.disabled=data.Busy);$$('[data-action=photoshopExport]').forEach(e=>e.disabled=data.Busy||!data.Saved||!(data.Formats||[]).length);$$('[data-action=photoshopOpenOutput]').forEach(e=>e.disabled=data.Busy||(!(data.OutputFiles||[]).length&&!data.OutputPath&&!data.PsdPath));for(const input of $$('.photoshop-options input'))input.disabled=data.Busy;
+ const results=$('#photoshop-results');results.replaceChildren();if(!(data.OutputFiles||[]).length){const empty=document.createElement('div');empty.className='photoshop-empty';empty.textContent=data.LastError||'导出的本地文件会显示在这里';results.append(empty)}else for(const path of data.OutputFiles){const row=document.createElement('div');row.className='photoshop-result-row';const name=document.createElement('strong');name.textContent=path.split(/[\\/]/).pop();const full=document.createElement('small');full.textContent=path;full.title=path;row.append(name,full);results.append(row)}
  document.documentElement.dataset.ready='true';if(!window.pageAnnounced){window.pageAnnounced=true;send('pageReady')}
 }
 function updateMode(){if(page!=='clarity')return;const api=$('#mode').value==='API 大模型清晰';$('#prompt-label').hidden=!api;$('#local-options').hidden=api;text('mode-note',api?'开始处理会将所选图片发送到配置的 API 服务商，并可能消耗额度。':'使用本机引擎处理图片。');}
@@ -66,6 +74,7 @@ function receive(s){
  text('service-status',s.organizer.enabled?'守护服务 · 监控中':'守护服务 · 待启动');
  if(page==='preferences'){document.documentElement.dataset.ready='true';if(!window.pageAnnounced){window.pageAnnounced=true;send('pageReady')}return}
  if(page==='localSearch'){renderLocalSearch(s.localSearch);return}
+ if(page==='photoshop'){renderPhotoshop(s.photoshop);return}
  if(page==='organizer'){
   set('organizer-path',s.organizer.path);text('organizer-note','仅监控指定目录：'+s.organizer.path);text('organizer-badge',s.organizer.enabled?'后台监控已启动':'后台监控已停止');text('organizer-status',s.organizer.enabled?'正在监控，等待文件下载稳定':'自动监控未启动');text('organizer-pending','待处理 '+s.organizer.pending+' 项');
   set('organizerOpenSheet',s.organizer.openSheet);set('organizerTargetScreenEnabled',s.organizer.targetScreenEnabled);set('organizerTargetScreen',s.organizer.targetScreen);set('organizerIsland',s.organizer.island);if($('#organizerTargetScreen')){$('#organizerTargetScreen').disabled=!s.organizer.targetScreenEnabled;const second=$('#organizerTargetScreen option[value="2"]');if(second)second.disabled=s.organizer.screenCount<2}
@@ -90,14 +99,14 @@ function receive(s){
 function setZoom(value){zoom=Math.max(.25,Math.min(4,value));$$('#original-preview,#result-preview').forEach(e=>{e.style.transform=`scale(${zoom})`});text('zoom-percent',Math.round(zoom*100)+'%');}
 document.addEventListener('click',e=>{
  const b=e.target.closest('[data-action]');if(!b||b.disabled||b.type==='checkbox')return;const action=b.dataset.action;
- if(['conversion','clarity','organizer','imageLink','localSearch','changelog','settings'].includes(action)){const target=action==='settings'?'preferences':action;if(parent!==window)send('navigate',{target});else location.href='index.html';return}
+ if(['conversion','clarity','organizer','imageLink','localSearch','photoshop','changelog','settings'].includes(action)){const target=action==='settings'?'preferences':action;if(parent!==window)send('navigate',{target});else location.href='index.html';return}
  if(action==='apiSettings'){if($('#api-frame'))return;const frame=document.createElement('iframe');frame.id='api-frame';frame.title='图片清晰度 API 配置';frame.src='settings.html';document.body.append(frame);return}
  if(action==='spreadsheets'){$('#spreadsheet-dialog').showModal();return}if(action==='dismissSheet'){$('#spreadsheet-dialog').close();return}
  if(action==='desktopOrganizerInfo'){$('#desktop-organizer-info-dialog').showModal();return}if(action==='dismissDesktopOrganizerInfo'){$('#desktop-organizer-info-dialog').close();return}
  if(action==='desktopProductUndo'){send(action,{recordId:b.dataset.recordId});return}
  if(action==='organizerStart'){if(state?.organizer.enabled){toast('自动监控已在运行');return}b.classList.remove('is-active');b.classList.add('is-starting');const label=b.querySelector('.organizer-start-label');if(label)label.textContent='正在启动…';send(action,{options:options()});return}
  if(action==='filterLog'){window.logFilter=b.dataset.filter;renderLog();$$('[data-action=filterLog]').forEach(x=>x.classList.toggle('active-filter',x===b));return}
- if(action==='versionInfo'){toast('当前安装 v3.0.7。本版本通过本机安装更新，未配置在线更新服务。');return}
+ if(action==='versionInfo'){toast('当前安装 v3.0.8。本版本通过本机安装更新，未配置在线更新服务。');return}
  if(action==='openR2Config'){$('#r2-config-dialog').showModal();return}
  if(action==='imageLinkSaveConfig'){send(action,{accountId:$('#link-account').value,bucket:$('#link-bucket').value,publicBaseUrl:$('#link-public-url').value,accessKey:$('#link-access-key').value,secretKey:$('#link-secret-key').value,clearCredentials:$('#link-clear-key').checked});return}
  if(action==='imageLinkStart'){send(action,{options:options()});return}
@@ -122,6 +131,7 @@ document.addEventListener('change',e=>{
  if(page==='organizer'){if(e.target.id==='desktop-organize-scope'){send('desktopOrganizeScope',{scope:e.target.value});return}if(['organizerOpenSheet','organizerTargetScreenEnabled','organizerTargetScreen','organizerIsland'].includes(e.target.id))send('organizerOptions',{openSheet:$('#organizerOpenSheet').checked,targetScreenEnabled:$('#organizerTargetScreenEnabled').checked,targetScreen:Number($('#organizerTargetScreen').value),island:$('#organizerIsland').checked});return}
  if(page==='imageLink'){for(const element of $$('[data-link-option=size]'))element.disabled=!$('#link-resize').checked;send('imageLinkOptions',{options:options()});return}
  if(page==='localSearch'){updateLocalSearchMode();send('localSearchOptions',{options:options()});return}
+ if(page==='photoshop'){const mode=$('[name=photoshop-output]:checked')?.value||'current';$('#photoshop-output-path').disabled=mode!=='custom';$$('[data-action=photoshopBrowseOutput]').forEach(button=>button.disabled=mode!=='custom');text('photoshop-quality-value',$('#photoshop-jpg-quality').value);send('photoshopOptions',{options:options()});return}
  if(['conversion','clarity'].includes(page)){
   if(['width','height'].includes(e.target.id))set('size',4);
   if(e.target.id==='size'){const dims={1:[1650,1650],2:[1464,600],3:[970,600]}[$('#size').value];if(dims){set('width',dims[0]);set('height',dims[1])}}
