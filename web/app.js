@@ -97,7 +97,7 @@ document.addEventListener('click',e=>{
  if(action==='desktopProductUndo'){send(action,{recordId:b.dataset.recordId});return}
  if(action==='organizerStart'){if(state?.organizer.enabled){toast('自动监控已在运行');return}b.classList.remove('is-active');b.classList.add('is-starting');const label=b.querySelector('.organizer-start-label');if(label)label.textContent='正在启动…';send(action,{options:options()});return}
  if(action==='filterLog'){window.logFilter=b.dataset.filter;renderLog();$$('[data-action=filterLog]').forEach(x=>x.classList.toggle('active-filter',x===b));return}
- if(action==='versionInfo'){toast('当前安装 v3.0.6。本版本通过本机安装更新，未配置在线更新服务。');return}
+ if(action==='versionInfo'){toast('当前安装 v3.0.7。本版本通过本机安装更新，未配置在线更新服务。');return}
  if(action==='openR2Config'){$('#r2-config-dialog').showModal();return}
  if(action==='imageLinkSaveConfig'){send(action,{accountId:$('#link-account').value,bucket:$('#link-bucket').value,publicBaseUrl:$('#link-public-url').value,accessKey:$('#link-access-key').value,secretKey:$('#link-secret-key').value,clearCredentials:$('#link-clear-key').checked});return}
  if(action==='imageLinkStart'){send(action,{options:options()});return}

@@ -41,6 +41,13 @@
  --theme-accent-soft:#fde1dc;--theme-secondary:#457b9d;--theme-badge:#f4d35e;--theme-on-accent:#ffffff;
  --theme-shadow:0 24px 52px -16px rgba(83,39,35,.22);--theme-sidebar-shadow:0 20px 42px -12px rgba(70,18,25,.38);
 }
+:root[data-theme="liquidCrystal"]{
+ --theme-canvas:#ebf1f8;--theme-sidebar:rgba(30,50,78,.82);--theme-sidebar-text:#ffffff;--theme-sidebar-muted:#cfdae8;
+ --theme-surface:rgba(255,255,255,.72);--theme-surface-soft:rgba(242,245,252,.85);--theme-surface-strong:rgba(226,235,247,.82);--theme-border:rgba(200,215,235,.72);
+ --theme-text:#0f172a;--theme-muted:#475569;--theme-accent:#ff5722;--theme-accent-strong:#e44312;
+ --theme-accent-soft:rgba(255,111,60,.14);--theme-secondary:#2a70d6;--theme-badge:#8b5cf6;--theme-on-accent:#ffffff;
+ --theme-shadow:0 20px 40px -15px rgba(26,43,76,.16),inset 0 1px 0 rgba(255,255,255,.9);--theme-sidebar-shadow:0 20px 40px -15px rgba(26,43,76,.28),inset 0 1px 0 rgba(255,255,255,.28);
+}
 
 html,body,body.desktop-body{background:var(--theme-canvas)!important;color:var(--theme-text)!important}
 #desktop-shell>main,[data-purpose="primary-workspace"]{background:var(--theme-surface)!important;color:var(--theme-text)!important;box-shadow:var(--theme-shadow)!important}
@@ -84,6 +91,15 @@ progress::-webkit-progress-value{background:var(--theme-accent)!important}
 .expanded-preview{border-color:var(--theme-accent)!important}
 #toast{background:var(--theme-sidebar)!important;color:var(--theme-sidebar-text)!important}
 dialog::backdrop{background:color-mix(in srgb,var(--theme-sidebar) 55%,transparent)}
+
+/* Liquid Crystal Glass only changes material and color; layout metrics remain untouched. */
+:root[data-theme="liquidCrystal"] body{background-color:#ebf1f8!important;background-image:radial-gradient(circle at 16% 12%,rgba(255,255,255,.94),transparent 34%),radial-gradient(circle at 86% 18%,rgba(74,144,226,.18),transparent 32%),linear-gradient(145deg,#ebf1f8 0%,#dde8f4 100%)!important}
+:root[data-theme="liquidCrystal"] #desktop-shell>main,:root[data-theme="liquidCrystal"] [data-purpose="primary-workspace"],:root[data-theme="liquidCrystal"] #global-sidebar,:root[data-theme="liquidCrystal"] .card,:root[data-theme="liquidCrystal"] .config-card,:root[data-theme="liquidCrystal"] .release-card,:root[data-theme="liquidCrystal"] dialog,:root[data-theme="liquidCrystal"] .result-row,:root[data-theme="liquidCrystal"] .search-result,:root[data-theme="liquidCrystal"] .link-panel,:root[data-theme="liquidCrystal"] .search-panel{backdrop-filter:blur(24px) saturate(160%);-webkit-backdrop-filter:blur(24px) saturate(160%);border-color:rgba(255,255,255,.85)!important;box-shadow:0 12px 32px -4px rgba(15,23,42,.06),0 4px 12px -2px rgba(15,23,42,.03),inset 0 1px 0 rgba(255,255,255,.9)!important}
+:root[data-theme="liquidCrystal"] #global-sidebar{background:linear-gradient(155deg,rgba(30,50,78,.84),rgba(47,78,113,.72))!important}
+:root[data-theme="liquidCrystal"] [class~="bg-primary"],:root[data-theme="liquidCrystal"] [class~="bg-primary-container"],:root[data-theme="liquidCrystal"] [class~="bg-[#ff5e36]"],:root[data-theme="liquidCrystal"] .primary,:root[data-theme="liquidCrystal"] .coral-pill{background:linear-gradient(145deg,#ff6f3c 0%,#ff4513 100%)!important;border-color:rgba(255,255,255,.4)!important;box-shadow:0 8px 20px -4px rgba(255,78,25,.45),inset 0 1.5px 2px rgba(255,255,255,.6),inset 0 -2px 4px rgba(0,0,0,.15)!important;color:#fff!important;text-shadow:0 1px 2px rgba(0,0,0,.15)}
+:root[data-theme="liquidCrystal"] input:not([type="checkbox"]):not([type="radio"]),:root[data-theme="liquidCrystal"] select,:root[data-theme="liquidCrystal"] textarea{background:rgba(255,255,255,.85)!important;border-color:rgba(226,232,240,.8)!important;box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+:root[data-theme="liquidCrystal"] progress::-webkit-progress-value{background:linear-gradient(135deg,#4a90e2,#2a70d6)!important}
+:root[data-theme="liquidCrystal"] #service-status,:root[data-theme="liquidCrystal"] .status-badge{color:#10b981!important}
 
 .preferences-content{flex:1;min-height:0;overflow:auto;padding:0 32px 32px}
 .theme-intro{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:16px;padding:15px 18px;border:1px solid var(--theme-border);border-radius:20px;background:var(--theme-surface-soft)}

@@ -1,7 +1,7 @@
 (function(){
  'use strict';
  const storageKey='pngToJpg.theme';
- const themes=new Set(['classic','cyber','minimal','industrial','mediterranean','retro']);
+ const themes=new Set(['classic','cyber','minimal','industrial','mediterranean','retro','liquidCrystal']);
  function normalize(value){return themes.has(value)?value:'classic'}
  function read(){try{return normalize(localStorage.getItem(storageKey))}catch{return'classic'}}
  function syncControls(theme){
