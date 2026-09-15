@@ -5,7 +5,7 @@ function host(message){window.chrome?.webview?.postMessage(message)}
 function deliver(frame,message){frame.contentWindow.postMessage(message,location.origin)}
 function mergeState(next){
  if(!latestState)return next;
- return {...latestState,...next,conversion:{...latestState.conversion,...next.conversion},clarity:{...latestState.clarity,...next.clarity},organizer:{...latestState.organizer,...next.organizer},imageLink:{...latestState.imageLink,...next.imageLink},localSearch:{...latestState.localSearch,...next.localSearch},photoshop:{...latestState.photoshop,...next.photoshop},config:{...latestState.config,...next.config}};
+ return {...latestState,...next,conversion:{...latestState.conversion,...next.conversion},clarity:{...latestState.clarity,...next.clarity},organizer:{...latestState.organizer,...next.organizer},imageLink:{...latestState.imageLink,...next.imageLink},localSearch:{...latestState.localSearch,...next.localSearch},photoshop:{...latestState.photoshop,...next.photoshop},storage:{...latestState.storage,...next.storage},config:{...latestState.config,...next.config}};
 }
 function navigatePage(page){
  if(!framesByPage.has(page))return;requestedPage=page;if(!readyPages.has(page))return;

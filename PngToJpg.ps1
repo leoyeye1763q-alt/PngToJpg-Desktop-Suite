@@ -869,6 +869,7 @@ $script:localSearchWorkerScriptPath = Join-Path $PSScriptRoot 'modules\LocalSear
 Initialize-LocalSearch
 . (Join-Path $PSScriptRoot 'modules\PhotoshopAssistant.ps1')
 Initialize-PhotoshopAssistant
+. (Join-Path $PSScriptRoot 'modules\StorageManager.ps1')
 $script:taskTempRoot = Join-Path ([Environment]::GetFolderPath('LocalApplicationData')) 'PngToJpg\Temp'
 $script:powerShellPath = [Environment]::ProcessPath
 $script:folderOrganizerScriptPath = Join-Path $PSScriptRoot 'modules\FolderOrganizer.ps1'
@@ -5237,4 +5238,4 @@ if ($SmokeTest) {
 Start-WebUi
 [void]$form.ShowDialog()
 if ($SmokeTestWebUi -and $script:webTestError) { throw $script:webTestError }
-if ($SmokeTestWebUi -and $script:webTestStage -ne 9) { throw "Web UI test incomplete at stage $script:webTestStage" }
+if ($SmokeTestWebUi -and $script:webTestStage -ne 10) { throw "Web UI test incomplete at stage $script:webTestStage" }
