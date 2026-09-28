@@ -5,11 +5,7 @@ if exist "%~dp0PngToJpgLauncher.exe" (
     start "" "%~dp0PngToJpgLauncher.exe" %*
     exit /b 0
 )
-set "PWSH=pwsh.exe"
-where "%PWSH%" >nul 2>&1 || (
-    echo PowerShell 7 ^(pwsh.exe^) was not found. Install it and try again.
-    pause
-    exit /b 1
-)
+set "PWSH=C:\Users\Super-pc998\.cache\codex-runtimes\codex-primary-runtime\dependencies\native\powershell\pwsh.exe"
+if not exist "%PWSH%" set "PWSH=pwsh.exe"
 start "PNG to JPG" "%PWSH%" -NoLogo -NoProfile -File "%~dp0PngToJpg.ps1" %*
 endlocal

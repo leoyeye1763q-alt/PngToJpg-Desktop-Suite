@@ -1,0 +1,8 @@
+{
+  "enabled": true,
+  "provider": "github",
+  "repository": "leoyeye1763q-alt/PngToJpg-Desktop-Suite",
+  "manifestUrl": "",
+  "checkOnLaunch": false,
+  "timeoutSeconds": 2
+}

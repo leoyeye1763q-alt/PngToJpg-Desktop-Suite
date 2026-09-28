@@ -5,7 +5,7 @@ Dim launcherPath, iconPath, workingDirectory, shortcutName
 
 Set fso = CreateObject("Scripting.FileSystemObject")
 Set shell = CreateObject("WScript.Shell")
-workingDirectory = fso.GetParentFolderName(WScript.ScriptFullName)
+workingDirectory = "C:\Users\Super-pc998\Documents\Codex\2026-08-19\new-chat-2\PngToJpg"
 launcherPath = fso.BuildPath(workingDirectory, "PngToJpgLauncher.exe")
 iconPath = fso.BuildPath(workingDirectory, "PngToJpg.ico")
 If Not fso.FileExists(launcherPath) Then
