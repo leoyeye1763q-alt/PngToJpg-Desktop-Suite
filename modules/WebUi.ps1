@@ -51,12 +51,14 @@ function Send-WebToast([string]$Message) {
     if ($script:webHost.Loaded) { $script:webHost.Send((@{type='toast';message=$Message}|ConvertTo-Json -Compress)) }
 }
 function Invoke-OnlineUpdateCheck {
+    param([switch]$Automatic)
     $installDir = Split-Path $PSScriptRoot -Parent
     $configPath = Join-Path $installDir 'update-config.json'
     if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { Send-WebToast '未找到在线更新配置：update-config.json。'; return }
     try {
         $config = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
         if (-not [bool]$config.enabled) { Send-WebToast '在线更新服务尚未启用。'; return }
+        if ($Automatic -and -not [bool]$config.checkOnLaunch) { return }
         $manifestUrl = [string]$config.manifestUrl
         if ([string]$config.provider -eq 'github') {
             $repository = [string]$config.repository
@@ -104,7 +106,10 @@ function Handle-WebMessage($Message) {
     if ($null -eq $Message -or $null -eq $Message['action']) { return }
     $page=[string]$Message['page']
     switch([string]$Message.action) {
-        'ready' {if($page -eq 'storage'){[void](Get-StorageManagerWebState -Refresh)}}
+        'ready' {
+            if($page -eq 'storage'){[void](Get-StorageManagerWebState -Refresh)}
+            if(-not $script:updateCheckStarted){$script:updateCheckStarted=$true;Invoke-OnlineUpdateCheck -Automatic}
+        }
         'readyShell' {$script:webForcePreviewState=$true}
         'checkForUpdate' { Invoke-OnlineUpdateCheck }
         'uiError' {throw ('HTML script error: '+$Message.message)}
