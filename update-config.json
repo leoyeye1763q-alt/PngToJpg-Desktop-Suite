@@ -3,6 +3,6 @@
   "provider": "github",
   "repository": "leoyeye1763q-alt/PngToJpg-Desktop-Suite",
   "manifestUrl": "",
-  "checkOnLaunch": false,
+  "checkOnLaunch": true,
   "timeoutSeconds": 2
 }
