@@ -31,11 +31,24 @@ function Get-WebPreview($Box) {
     $stream=[IO.MemoryStream]::new()
     try{$Box.Image.Save($stream,[Drawing.Imaging.ImageFormat]::Png);return 'data:image/png;base64,'+[Convert]::ToBase64String($stream.ToArray())}finally{$stream.Dispose()}
 }
+function Get-BatchReportOutputDirectory {
+    if(-not [string]::IsNullOrWhiteSpace([string]$script:lastOutputDirectory) -and (Test-Path -LiteralPath $script:lastOutputDirectory -PathType Container)){return [string]$script:lastOutputDirectory}
+    if([string]::IsNullOrWhiteSpace([string]$script:lastBatchReportPath) -or -not (Test-Path -LiteralPath $script:lastBatchReportPath -PathType Leaf)){return ''}
+    try {
+        foreach($line in [IO.File]::ReadLines($script:lastBatchReportPath,[Text.Encoding]::UTF8)) {
+            if($line -match '^\|\s+[^|]+\s+\|\s+[^|]+\s+\|\s+(.+?)\s+\|\s*$') {
+                $output=$matches[1].Trim(); $parent=[IO.Path]::GetDirectoryName($output); if((Test-Path -LiteralPath $output -PathType Leaf) -or (Test-Path -LiteralPath $parent -PathType Container)){return $parent}
+            }
+        }
+    } catch { }
+    return ''
+}
 function Send-WebState([switch]$IncludePreviews) {
     if(-not $script:webHost.Loaded){return}
     $config=@{};foreach($key in @('Protocol','Endpoint','Model','Prompt','AuthHeader','AuthPrefix','ImageField','ImageEncoding','ResponseType','ResponsePath','TimeoutSeconds','FieldsJson')){$config[$key]=$script:imageApiConfig[$key]}
     $reportContent=''; if(-not [string]::IsNullOrWhiteSpace([string]$script:lastBatchReportPath) -and (Test-Path -LiteralPath $script:lastBatchReportPath -PathType Leaf)){try{$reportContent=[IO.File]::ReadAllText($script:lastBatchReportPath,[Text.Encoding]::UTF8)}catch{}}
-    $conversion=@{items=@($list.Items|ForEach-Object{@{name=$_.Text;checked=$_.Checked;dimensions=$_.SubItems[1].Text;size=$_.SubItems[2].Text;status=$_.SubItems[3].Text}});busy=$script:isConverting;status=$status.Text;progress=$progressBar.Value;format=@('jpg','png','webp','source','pdf','docx','pptx')[$formatCombo.SelectedIndex];size=$sizeCombo.SelectedIndex;width=$finalWidthBox.Value;height=$finalHeightBox.Value;alpha=$preserveAlphaCheck.Checked;sameFolder=$sameFolder.Checked;openFolder=$openFolderCheck.Checked;output=$outputBox.Text;customNameEnabled=[bool]$script:customNamingEnabled;namePrefix=[string]$script:customNamePrefix;nameSuffix=[int]$script:customNameStart;batchReportPath=[string]$script:lastBatchReportPath;batchReportContent=$reportContent;batchReportOutputDirectory=[string]$script:lastOutputDirectory}
+    $reportOutputDirectory=Get-BatchReportOutputDirectory
+    $conversion=@{items=@($list.Items|ForEach-Object{@{name=$_.Text;checked=$_.Checked;dimensions=$_.SubItems[1].Text;size=$_.SubItems[2].Text;status=$_.SubItems[3].Text}});busy=$script:isConverting;status=$status.Text;progress=$progressBar.Value;format=@('jpg','png','webp','source','pdf','docx','pptx')[$formatCombo.SelectedIndex];size=$sizeCombo.SelectedIndex;width=$finalWidthBox.Value;height=$finalHeightBox.Value;alpha=$preserveAlphaCheck.Checked;sameFolder=$sameFolder.Checked;openFolder=$openFolderCheck.Checked;output=$outputBox.Text;customNameEnabled=[bool]$script:customNamingEnabled;namePrefix=[string]$script:customNamePrefix;nameSuffix=[int]$script:customNameStart;batchReportPath=[string]$script:lastBatchReportPath;batchReportContent=$reportContent;batchReportOutputDirectory=$reportOutputDirectory}
     $clarityState=@{items=@($script:clarity.List.Items|ForEach-Object{@{name=$_.Text;checked=$_.Checked;status=$_.SubItems[1].Text;reason=$_.ToolTipText}});busy=$script:clarity.Busy;status=$script:clarity.Status.Text;progress=$script:clarity.Progress.Value;format=$script:clarity.Format.Text;mode=$script:clarity.Mode.Text;strength=$script:clarity.Strength.Text;scale=$script:clarity.Scale.SelectedIndex;imageType=$script:clarity.ImageType.Text;sameFolder=$script:clarity.SameFolder.Checked;output=$script:clarity.Output.Text}
     foreach($pair in @(@('conversion','original',$conversion,$previewBox),@('conversion','result',$conversion,$resultPreviewBox),@('clarity','original',$clarityState,$script:clarity.Original),@('clarity','result',$clarityState,$script:clarity.Result))){
         $key=$pair[0]+'-'+$pair[1]
@@ -188,8 +201,9 @@ function Handle-WebMessage($Message) {
         'spreadsheetOpen' {Open-QueuedSpreadsheets}
         'openBatchReport' { Open-LastBatchReport }
         'openBatchReportFolder' {
-            if([string]::IsNullOrWhiteSpace([string]$script:lastOutputDirectory) -or -not (Test-Path -LiteralPath $script:lastOutputDirectory -PathType Container)){throw '当前没有可打开的批次输出文件夹。'}
-            Start-Process -FilePath 'explorer.exe' -ArgumentList @($script:lastOutputDirectory)
+            $directory=Get-BatchReportOutputDirectory
+            if([string]::IsNullOrWhiteSpace($directory)){throw '当前没有可打开的批次输出文件夹。'}
+            Start-Process -FilePath 'explorer.exe' -ArgumentList @($directory)
         }
         'exportLog' {$dialog=[Windows.Forms.SaveFileDialog]::new();$dialog.Filter='Markdown|*.md';$dialog.FileName='蟑螂强-更新日志.md';try{if($dialog.ShowDialog($form) -eq 'OK'){[IO.File]::WriteAllText($dialog.FileName,$script:webChangelog,[Text.UTF8Encoding]::new($false))}}finally{$dialog.Dispose()}}
     }
