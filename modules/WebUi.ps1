@@ -1,4 +1,4 @@
-﻿function Invoke-WebControlClick($Control) {
+function Invoke-WebControlClick($Control) {
     $method=[Windows.Forms.Control].GetMethod('OnClick',[Reflection.BindingFlags]'Instance,NonPublic')
     [void]$method.Invoke($Control,@([EventArgs]::Empty))
 }
@@ -20,8 +20,9 @@ function Set-WebOptions($Options,[string]$Page) {
         $preserveAlphaCheck.Checked=[bool]$Options.alpha;$sameFolder.Checked=[bool]$Options.sameFolder;$openFolderCheck.Checked=[bool]$Options.openFolder
         $script:customNamingEnabled=[bool]$Options.customNameEnabled
         $requestedPrefix=[string]$Options.namePrefix
-        $script:customNamePrefix=if($requestedPrefix -in @('主图','副图','A')){$requestedPrefix}else{'主图'}
+        $script:customNamePrefix=if($requestedPrefix -in @('主图','副图','A','A+')){$requestedPrefix}else{'主图'}
         $script:customNameStart=[Math]::Clamp([int]$Options.nameSuffix,1,999999)
+        if($script:customNamePrefix -eq 'A'){$sizeCombo.SelectedIndex=2;$finalWidthBox.Value=1464;$finalHeightBox.Value=600}else{$sizeCombo.SelectedIndex=1;$finalWidthBox.Value=1650;$finalHeightBox.Value=1650}
         Save-AppState
     }
 }
@@ -33,7 +34,8 @@ function Get-WebPreview($Box) {
 function Send-WebState([switch]$IncludePreviews) {
     if(-not $script:webHost.Loaded){return}
     $config=@{};foreach($key in @('Protocol','Endpoint','Model','Prompt','AuthHeader','AuthPrefix','ImageField','ImageEncoding','ResponseType','ResponsePath','TimeoutSeconds','FieldsJson')){$config[$key]=$script:imageApiConfig[$key]}
-    $conversion=@{items=@($list.Items|ForEach-Object{@{name=$_.Text;checked=$_.Checked;dimensions=$_.SubItems[1].Text;size=$_.SubItems[2].Text;status=$_.SubItems[3].Text}});busy=$script:isConverting;status=$status.Text;progress=$progressBar.Value;format=@('jpg','png','webp','source','pdf','docx','pptx')[$formatCombo.SelectedIndex];size=$sizeCombo.SelectedIndex;width=$finalWidthBox.Value;height=$finalHeightBox.Value;alpha=$preserveAlphaCheck.Checked;sameFolder=$sameFolder.Checked;openFolder=$openFolderCheck.Checked;output=$outputBox.Text;customNameEnabled=[bool]$script:customNamingEnabled;namePrefix=[string]$script:customNamePrefix;nameSuffix=[int]$script:customNameStart}
+    $reportContent=''; if(-not [string]::IsNullOrWhiteSpace([string]$script:lastBatchReportPath) -and (Test-Path -LiteralPath $script:lastBatchReportPath -PathType Leaf)){try{$reportContent=[IO.File]::ReadAllText($script:lastBatchReportPath,[Text.Encoding]::UTF8)}catch{}}
+    $conversion=@{items=@($list.Items|ForEach-Object{@{name=$_.Text;checked=$_.Checked;dimensions=$_.SubItems[1].Text;size=$_.SubItems[2].Text;status=$_.SubItems[3].Text}});busy=$script:isConverting;status=$status.Text;progress=$progressBar.Value;format=@('jpg','png','webp','source','pdf','docx','pptx')[$formatCombo.SelectedIndex];size=$sizeCombo.SelectedIndex;width=$finalWidthBox.Value;height=$finalHeightBox.Value;alpha=$preserveAlphaCheck.Checked;sameFolder=$sameFolder.Checked;openFolder=$openFolderCheck.Checked;output=$outputBox.Text;customNameEnabled=[bool]$script:customNamingEnabled;namePrefix=[string]$script:customNamePrefix;nameSuffix=[int]$script:customNameStart;batchReportPath=[string]$script:lastBatchReportPath;batchReportContent=$reportContent;batchReportOutputDirectory=[string]$script:lastOutputDirectory}
     $clarityState=@{items=@($script:clarity.List.Items|ForEach-Object{@{name=$_.Text;checked=$_.Checked;status=$_.SubItems[1].Text;reason=$_.ToolTipText}});busy=$script:clarity.Busy;status=$script:clarity.Status.Text;progress=$script:clarity.Progress.Value;format=$script:clarity.Format.Text;mode=$script:clarity.Mode.Text;strength=$script:clarity.Strength.Text;scale=$script:clarity.Scale.SelectedIndex;imageType=$script:clarity.ImageType.Text;sameFolder=$script:clarity.SameFolder.Checked;output=$script:clarity.Output.Text}
     foreach($pair in @(@('conversion','original',$conversion,$previewBox),@('conversion','result',$conversion,$resultPreviewBox),@('clarity','original',$clarityState,$script:clarity.Original),@('clarity','result',$clarityState,$script:clarity.Result))){
         $key=$pair[0]+'-'+$pair[1]
@@ -45,11 +47,66 @@ function Send-WebState([switch]$IncludePreviews) {
     $organizerState=@{enabled=[bool]$script:organizerEnabled;path=$organizerPathBox.Text;pending=$script:organizerPending.Count;log=@($script:organizerLog);openSheet=$script:organizerOpenSpreadsheetEnabled;targetScreenEnabled=$script:organizerSpreadsheetScreenEnabled;targetScreen=($script:organizerSpreadsheetScreenIndex+1);screenCount=@([Windows.Forms.Screen]::AllScreens).Count;island=$script:dynamicIslandEnabled;sheets=@($spreadsheetList.Items|ForEach-Object {($_.SubItems|ForEach-Object Text)-join ' · '});sheetStatus=$spreadsheetStatus.Text;desktopScope=[string]$script:desktopOrganizeScope;desktopHistory=@(Get-DesktopOrganizationHistory -HistoryPath $script:desktopProductHistoryPath -RetentionDays 30)}
     $script:webHost.Send((@{type='state';conversion=$conversion;clarity=$clarityState;organizer=$organizerState;imageLink=(Get-ImageLinkWebState);localSearch=(Get-LocalSearchWebState);photoshop=(Get-PhotoshopAssistantWebState);storage=(Get-StorageManagerWebState);changelog=$script:webChangelog;config=$config;hasKey=[bool]$script:imageApiConfig.ProtectedKey}|ConvertTo-Json -Depth 10 -Compress))
 }
+function Send-WebToast([string]$Message) {
+    if ($script:webHost.Loaded) { $script:webHost.Send((@{type='toast';message=$Message}|ConvertTo-Json -Compress)) }
+}
+function Invoke-OnlineUpdateCheck {
+    $installDir = Split-Path $PSScriptRoot -Parent
+    $configPath = Join-Path $installDir 'update-config.json'
+    if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) { Send-WebToast '未找到在线更新配置：update-config.json。'; return }
+    try {
+        $config = Get-Content -LiteralPath $configPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        if (-not [bool]$config.enabled) { Send-WebToast '在线更新服务尚未启用。'; return }
+        $manifestUrl = [string]$config.manifestUrl
+        if ([string]$config.provider -eq 'github') {
+            $repository = [string]$config.repository
+            if ([string]::IsNullOrWhiteSpace($repository)) { Send-WebToast 'GitHub 仓库地址尚未配置。'; return }
+            $manifestUrl = 'https://api.github.com/repos/' + $repository.Trim('/') + '/releases/latest'
+        }
+        if ([string]::IsNullOrWhiteSpace($manifestUrl) -or $manifestUrl -match 'your-domain\.example') { Send-WebToast '在线更新地址尚未配置。'; return }
+        $timeout = [Math]::Max(1, [int]$config.timeoutSeconds)
+        $response = Invoke-RestMethod -Uri $manifestUrl -TimeoutSec $timeout -Headers @{ 'Cache-Control' = 'no-cache'; 'User-Agent' = 'ZhangLangQiang-App-Updater' }
+        if ([string]$config.provider -eq 'github') {
+            $asset = @($response.assets | Where-Object { $_.name -match '\.zip$' } | Select-Object -First 1)
+            if (-not $asset) { Send-WebToast 'GitHub 最新 Release 尚未上传 ZIP 更新包。'; return }
+            $version = ([string]$response.tag_name).TrimStart('v')
+            $versionPath = Join-Path $installDir 'version.json'
+            $current = if (Test-Path -LiteralPath $versionPath) { [string](Get-Content $versionPath -Raw -Encoding UTF8 | ConvertFrom-Json).version } else { '3.0.12' }
+            if ([version]$version -le [version]$current) { Send-WebToast ("当前已是最新版本 v{0}。" -f $current); return }
+            $digest = [string]$asset.digest
+            if ($digest -match '^sha256:') { $digest = $digest.Substring(7) }
+            if ([string]::IsNullOrWhiteSpace($digest)) {
+                $shaNames = @($asset.name + '.sha256', ([IO.Path]::GetFileNameWithoutExtension($asset.name) + '.sha256'))
+                $shaAsset = @($response.assets | Where-Object { $_.name -in $shaNames } | Select-Object -First 1)
+                if ($shaAsset) {
+                    $digest = ((Invoke-WebRequest -Uri ([string]$shaAsset.browser_download_url) -UseBasicParsing -TimeoutSec $timeout -Headers @{ 'User-Agent' = 'ZhangLangQiang-App-Updater' }).Content.Trim() -split '\s+')[0]
+                }
+            }
+            if ([string]::IsNullOrWhiteSpace($digest)) { Send-WebToast 'GitHub 更新包缺少 SHA-256 校验值。'; return }
+            $manifest = [pscustomobject]@{ version=$version; notes=[string]$response.body; packageUrl=[string]$asset.browser_download_url; sha256=$digest }
+        } else { $manifest = $response }
+        $versionPath = Join-Path $installDir 'version.json'
+        $current = if (Test-Path -LiteralPath $versionPath) { [string](Get-Content $versionPath -Raw -Encoding UTF8 | ConvertFrom-Json).version } else { '3.0.12' }
+        $available = [string]$manifest.version
+        if ([version]$available -le [version]$current) { Send-WebToast ("当前已是最新版本 v{0}。" -f $current); return }
+        $answer = [Windows.Forms.MessageBox]::Show(("发现新版本 v{0}。`n`n{1}`n`n现在下载并安装吗？" -f $available,[string]$manifest.notes),'蟑螂强 APP · 发现更新','YesNo','Information')
+        if ($answer -ne [Windows.Forms.DialogResult]::Yes) { return }
+        $updater = Join-Path $installDir 'PngToJpgUpdater.exe'
+        if (-not (Test-Path -LiteralPath $updater -PathType Leaf)) { Send-WebToast '当前安装缺少更新器，请先安装包含在线更新组件的版本。'; return }
+        $updaterCopy = Join-Path ([IO.Path]::GetTempPath()) ('PngToJpgUpdater_' + [guid]::NewGuid().ToString('N') + '.exe')
+        Copy-Item -LiteralPath $updater -Destination $updaterCopy -Force
+        Start-Process -FilePath $updaterCopy -ArgumentList @('--install-dir',$installDir,'--package-url',[string]$manifest.packageUrl,'--sha256',[string]$manifest.sha256,'--restart',(Join-Path $installDir 'PngToJpgLauncher.exe'))
+        Send-WebToast '更新包已开始下载，程序将自动重启完成更新。'
+        $form.BeginInvoke([Action]{ $form.Close() }) | Out-Null
+    } catch { Send-WebToast ('检查在线更新失败：' + $_.Exception.Message) }
+}
 function Handle-WebMessage($Message) {
+    if ($null -eq $Message -or $null -eq $Message['action']) { return }
     $page=[string]$Message['page']
     switch([string]$Message.action) {
-        'ready' { }
+        'ready' {if($page -eq 'storage'){[void](Get-StorageManagerWebState -Refresh)}}
         'readyShell' {$script:webForcePreviewState=$true}
+        'checkForUpdate' { Invoke-OnlineUpdateCheck }
         'uiError' {throw ('HTML script error: '+$Message.message)}
         'drop' {$paths=[string[]]@();if($script:webHost.DroppedFiles.TryDequeue([ref]$paths)){if($page -eq 'clarity'){if(-not $script:clarity.Busy){Add-ClarityImages $paths}}elseif($page -eq 'organizer'){if([string]$Message.dropTarget -eq 'spreadsheets'){Add-SpreadsheetFoldersBatch -Paths $paths;Send-WebState}else{Add-OrganizerFoldersBatch -Paths $paths}}elseif($page -eq 'imageLink'){if($paths.Count){Add-ImageLinkImage $paths[0]}}elseif($page -eq 'localSearch'){if($paths.Count){Set-LocalSearchReference $paths[0]}}elseif($page -eq 'conversion' -and -not $script:isConverting){Add-ImageFiles $paths}}}
         'captured' {
@@ -94,6 +151,7 @@ function Handle-WebMessage($Message) {
         'imageLinkClear' {Clear-ImageLinkImage}
         'localSearchOptions' {Set-LocalSearchOptions $Message.options}
         'localSearchBrowseRoot' {$dialog=[Windows.Forms.FolderBrowserDialog]::new();$dialog.Description='选择要递归搜索的本地文件夹';try{if($dialog.ShowDialog($form) -eq 'OK'){Set-LocalSearchRoot $dialog.SelectedPath}}finally{$dialog.Dispose()}}
+        'localSearchRemoveRoot' {Remove-LocalSearchRoot ([int]$Message.index)}
         'localSearchChooseImage' {$dialog=[Windows.Forms.OpenFileDialog]::new();$dialog.Multiselect=$false;$dialog.Filter='图片|*.png;*.jpg;*.jpeg;*.jfif;*.bmp;*.gif;*.tif;*.tiff;*.webp;*.avif;*.heic;*.heif';try{if($dialog.ShowDialog($form) -eq 'OK'){Set-LocalSearchReference $dialog.FileName}}finally{$dialog.Dispose()}}
         'localSearchStart' {try{Set-LocalSearchOptions $Message.options;Start-LocalSearch}catch{$script:localSearch.Status='搜索失败：'+$_.Exception.Message;$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
         'localSearchCancel' {Stop-LocalSearch -Cancelled}
@@ -106,10 +164,10 @@ function Handle-WebMessage($Message) {
         'photoshopBrowseOutput' {try{Select-PhotoshopOutputDirectory $form}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
         'photoshopExport' {try{Start-PhotoshopExport $Message.options}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
         'photoshopOpenOutput' {try{Open-PhotoshopOutputDirectory}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
-        'storageScan' {try{Send-WebState}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'storageScan' {try{[void](Get-StorageManagerWebState -Refresh);Send-WebState}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
         'storageOpen' {try{Open-StorageCategory ([string]$Message.category)}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
-        'storageDelete' {try{$result=Remove-StorageSelectedFiles ([string]$Message.category) ([string[]]$Message.paths);Send-WebState;$script:webHost.Send((@{type='storageDeleteResult';result=$result}|ConvertTo-Json -Depth 6 -Compress))}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
-        'organizerBrowse' {if(-not $script:organizerEnabled){Invoke-WebControlClick $organizerPathBrowseButton}}
+        'storageDelete' {try{$result=Remove-StorageSelectedFiles ([string]$Message.category) ([string[]]$Message.paths);[void](Get-StorageManagerWebState -Refresh);Send-WebState;$script:webHost.Send((@{type='storageDeleteResult';result=$result}|ConvertTo-Json -Depth 6 -Compress))}catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress))}}
+        'organizerBrowse' {Invoke-WebControlClick $organizerPathBrowseButton;Send-WebState}
         'organizerStart' {if(-not $script:organizerEnabled){[void](Start-DesktopOrganizer -Path $organizerPathBox.Text)}}
         'organizerStop' {Stop-DesktopOrganizer}
         'organizerSingle' {Invoke-WebControlClick $organizerSingleButton}
@@ -123,6 +181,11 @@ function Handle-WebMessage($Message) {
         'spreadsheetAdd' {Invoke-WebControlClick $spreadsheetAddParentButton}
         'spreadsheetClear' {Clear-SpreadsheetFolderQueue}
         'spreadsheetOpen' {Open-QueuedSpreadsheets}
+        'openBatchReport' { Open-LastBatchReport }
+        'openBatchReportFolder' {
+            if([string]::IsNullOrWhiteSpace([string]$script:lastOutputDirectory) -or -not (Test-Path -LiteralPath $script:lastOutputDirectory -PathType Container)){throw '当前没有可打开的批次输出文件夹。'}
+            Start-Process -FilePath 'explorer.exe' -ArgumentList @($script:lastOutputDirectory)
+        }
         'exportLog' {$dialog=[Windows.Forms.SaveFileDialog]::new();$dialog.Filter='Markdown|*.md';$dialog.FileName='蟑螂强-更新日志.md';try{if($dialog.ShowDialog($form) -eq 'OK'){[IO.File]::WriteAllText($dialog.FileName,$script:webChangelog,[Text.UTF8Encoding]::new($false))}}finally{$dialog.Dispose()}}
     }
 }
@@ -139,6 +202,27 @@ function Save-WebApiConfig($Fields,[switch]$ValidateOnly) {
     $script:imageApiConfig=$config;$script:clarity.Prompt.Text=[string]$config.Prompt;Update-ClarityMode
     Send-WebState
     $script:webHost.Send('{"type":"saved"}')
+}
+function Start-FileConverterService {
+    $script:fileConverterPort = 8765
+    $script:fileConverterScript = Join-Path $PSScriptRoot '..\web\file-converter\Server.ps1'
+    $script:fileConverterProcess = $null
+    if (-not (Test-Path $script:fileConverterScript)) { return }
+    try {
+        $script:fileConverterProcess = Start-Process -FilePath 'pwsh.exe' -ArgumentList '-NoLogo','-NoProfile','-File',"$script:fileConverterScript" -WindowStyle Hidden -PassThru -ErrorAction SilentlyContinue
+        if ($script:fileConverterProcess) {
+            Write-Host "File Converter service started (PID: $($script:fileConverterProcess.Id))" -ForegroundColor Gray
+        }
+    } catch {
+        Write-Host "Failed to start File Converter service: $($_.Exception.Message)" -ForegroundColor DarkGray
+    }
+}
+function Stop-FileConverterService {
+    if ($script:fileConverterProcess -and -not $script:fileConverterProcess.HasExited) {
+        try { $script:fileConverterProcess | Stop-Process -Force -ErrorAction SilentlyContinue }
+        catch {}
+    }
+    $script:fileConverterProcess = $null
 }
 function Start-WebUi {
     $script:webChangelog=Get-Content (Join-Path $PSScriptRoot '..\CHANGELOG.md') -Raw
@@ -176,6 +260,7 @@ function Start-WebUi {
     $script:webArtifactDirectory=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\tests\artifacts'))
     [void][IO.Directory]::CreateDirectory($script:webArtifactDirectory)
     $form.Text='蟑螂强';$form.Padding=[Windows.Forms.Padding]::new(0);$appShell.Visible=$false
+    $verticalScrollSyncTimer.Stop()
     $dpiScale=$form.DeviceDpi/96.0
     $workArea=[Windows.Forms.Screen]::FromControl($form).WorkingArea
     $form.MinimumSize=[Drawing.Size]::new([Math]::Min(1180*$dpiScale,$workArea.Width),[Math]::Min(780*$dpiScale,$workArea.Height))
@@ -184,9 +269,10 @@ function Start-WebUi {
     [void]$list.Handle;[void]$script:clarity.List.Handle
     foreach($control in @($minimizeButton,$maximizeButton,$closeWindowButton)){$control.Visible=$false}
     $form.Controls.Add($script:webHost);$script:webHost.BringToFront()
-    $form.Add_Shown({$script:webHost.BringToFront();$script:webHost.Start((Join-Path $PSScriptRoot '..\web'),(Join-Path $script:dataDirectory 'webview-profile'))})
+    Start-FileConverterService
+    $form.Add_Shown({$verticalScrollSyncTimer.Stop();$script:webHost.BringToFront();$script:webHost.Start((Join-Path $PSScriptRoot '..\web'),(Join-Path $script:dataDirectory 'webview-profile'))})
     foreach($button in @($homeNavigationButton,$imageApiNavigationButton)){$button.Add_Click({$script:webHost.Visible=$true;$form.Padding=[Windows.Forms.Padding]::new(0);$script:webHost.BringToFront();[void]$script:webHost.CoreWebView2.ExecuteScriptAsync("navigatePage('$(if($script:activePage -eq 'Enhancement'){'clarity'}else{'conversion'})')")})}
-    $script:webTimer=[Windows.Forms.Timer]::new();$script:webTimer.Interval=50
+    $script:webTimer=[Windows.Forms.Timer]::new();$script:webTimer.Interval=100
     $script:webTimer.Add_Tick({
         try {
             if($script:webHost.Failure){throw $script:webHost.Failure}
@@ -196,6 +282,7 @@ function Start-WebUi {
                 $parsed=$message|ConvertFrom-Json -AsHashtable
                 if($SmokeTestWebUi -and $parsed.action -eq 'ready' -and $script:webTestLaunchedStage -ne $script:webTestStage -and $parsed.page -eq @('conversion','clarity','organizer','imageLink','localSearch','photoshop','storage','changelog','preferences','settings')[$script:webTestStage]){
                     $script:webTestLaunchedStage=$script:webTestStage
+                    if($parsed.page -eq 'storage'){[void](Get-StorageManagerWebState -Refresh)}
                     Send-WebState -IncludePreviews
                     $testCode=Get-Content (Join-Path $PSScriptRoot '..\tests\WebUi.Smoke.js') -Raw
                     if($script:webTestStage -lt 9){$testCode="document.querySelector('iframe.active').contentWindow.eval("+($testCode|ConvertTo-Json -Compress)+")"}
@@ -211,12 +298,13 @@ function Start-WebUi {
                 Send-WebState -IncludePreviews:$script:webForcePreviewState
                 $script:webForcePreviewState=$false
                 $isActive=[bool]($script:isConverting -or $script:clarity.Busy -or $script:imageLink.Busy -or $script:localSearch.Busy -or $script:photoshopAssistant.Busy -or $script:previewProcess -or $script:clarity.PreviewProcess -or $script:organizerWorkerProcess -or $script:organizerPending.Count)
+                $script:webTimer.Interval=if($isActive){100}else{150}
                 $script:webNextStateUtc=$now.AddMilliseconds($(if($isActive){350}else{1500}))
             }
             if($SmokeTestWebUi -and ([DateTime]::UtcNow-$script:webTestStarted).TotalSeconds -gt 180){throw "Web UI test timed out at stage $($script:webTestStage)"}
         }catch{$script:webHost.Send((@{type='error';message=$_.Exception.Message}|ConvertTo-Json -Compress));if($SmokeTestWebUi){$script:webTestError=$_.Exception.Message;$form.Close()}}
     });$script:webTimer.Start()
-    $form.Add_FormClosed({$script:webTimer.Stop();$script:webTimer.Dispose()})
+    $form.Add_FormClosed({$script:webTimer.Stop();$script:webTimer.Dispose();Stop-FileConverterService})
 }
 
 

@@ -88,7 +88,7 @@ public static class SpreadsheetWindowMover
     [DllImport("user32.dll", CharSet = CharSet.Unicode)] private static extern int GetWindowText(IntPtr window, System.Text.StringBuilder text, int count);
     [DllImport("user32.dll")] private static extern int GetWindowTextLength(IntPtr window);
     [DllImport("user32.dll")] private static extern bool GetWindowPlacement(IntPtr window, ref WindowPlacement placement);
-    [DllImport("user32.dll")] private static extern bool ShowWindowAsync(IntPtr window, int command);
+    [DllImport("user32.dll")] private static extern bool ShowWindow(IntPtr window, int command);
     [DllImport("user32.dll", SetLastError = true)] private static extern bool SetWindowPos(IntPtr window, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
 
     public static IntPtr FindVisibleWindow(string titleFragment)
@@ -121,7 +121,7 @@ public static class SpreadsheetWindowMover
         WindowPlacement placement = new WindowPlacement();
         placement.length = Marshal.SizeOf(typeof(WindowPlacement));
         bool wasMaximized = GetWindowPlacement(window, ref placement) && placement.showCmd == 3;
-        if (wasMaximized || placement.showCmd == 2) ShowWindowAsync(window, 9);
+        if (wasMaximized || placement.showCmd == 2) ShowWindow(window, 9);
 
         int width = placement.normalPosition.right - placement.normalPosition.left;
         int height = placement.normalPosition.bottom - placement.normalPosition.top;
@@ -130,7 +130,7 @@ public static class SpreadsheetWindowMover
         int x = workingArea.Left + Math.Max(0, (workingArea.Width - width) / 2);
         int y = workingArea.Top + Math.Max(0, (workingArea.Height - height) / 2);
         bool moved = SetWindowPos(window, IntPtr.Zero, x, y, width, height, 0x0004 | 0x0010);
-        if (moved && wasMaximized) ShowWindowAsync(window, 3);
+        if (moved && wasMaximized) ShowWindow(window, 3);
         return moved;
     }
 }
@@ -541,6 +541,7 @@ public sealed class OverlayPillForm : Form
     [DllImport("user32.dll")] private static extern IntPtr GetDC(IntPtr window);
     [DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr window, IntPtr dc);
     [DllImport("user32.dll", EntryPoint = "GetWindowLongW")] private static extern int GetWindowLong(IntPtr window, int index);
+    [DllImport("user32.dll", EntryPoint = "SetWindowLongW")] private static extern int SetWindowLong(IntPtr window, int index, int value);
     [DllImport("gdi32.dll")] private static extern IntPtr CreateCompatibleDC(IntPtr dc);
     [DllImport("gdi32.dll")] private static extern bool DeleteDC(IntPtr dc);
     [DllImport("gdi32.dll")] private static extern IntPtr SelectObject(IntPtr dc, IntPtr value);
@@ -553,7 +554,9 @@ public sealed class OverlayPillForm : Form
     private string glowMode = "Off";
     private float glowPhase;
     private readonly System.Threading.Timer animationTimer;
-    private const int AnimationIntervalMilliseconds = 16;
+    private readonly System.Windows.Forms.Timer arrowHitTimer;
+    public event EventHandler ArrowClicked;
+    private const int AnimationIntervalMilliseconds = 33;
     private volatile bool animationEnabled;
     private volatile bool animationFrameQueued;
     private Font titleFont;
@@ -572,6 +575,9 @@ public sealed class OverlayPillForm : Form
         SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
         ConfigureLayoutScale(1f);
         animationTimer = new System.Threading.Timer(AnimationTick, null, System.Threading.Timeout.Infinite, System.Threading.Timeout.Infinite);
+        arrowHitTimer = new System.Windows.Forms.Timer();
+        arrowHitTimer.Interval = 50;
+        arrowHitTimer.Tick += delegate { UpdateArrowInput(); };
     }
 
     public float LayoutScale { get { return layoutScale; } }
@@ -608,10 +614,37 @@ public sealed class OverlayPillForm : Form
     {
         if (message.Msg == 0x0084) // WM_NCHITTEST
         {
-            message.Result = new IntPtr(-1); // HTTRANSPARENT
+            int packed = unchecked((int)message.LParam.ToInt64());
+            Point client = PointToClient(new Point(unchecked((short)(packed & 0xffff)), unchecked((short)(packed >> 16))));
+            message.Result = new IntPtr(IsArrowPoint(client) ? 1 : -1); // Arrow: HTCLIENT; body: HTTRANSPARENT
             return;
         }
         base.WndProc(ref message);
+    }
+
+    public bool IsArrowPoint(Point point)
+    {
+        float s = layoutScale;
+        return new Rectangle(ClientSize.Width - (int)(51f * s), (int)(23f * s), (int)(36f * s), (int)(46f * s)).Contains(point);
+    }
+
+    private void UpdateArrowInput()
+    {
+        if (IsDisposed || !IsHandleCreated) return;
+        bool clickable = Visible && IsArrowPoint(PointToClient(System.Windows.Forms.Cursor.Position));
+        int style = GetWindowLong(Handle, -20);
+        int next = clickable ? style & ~0x00000020 : style | 0x00000020;
+        if (next != style) SetWindowLong(Handle, -20, next);
+        Cursor = clickable ? Cursors.Hand : Cursors.Default;
+    }
+
+    protected override void OnMouseClick(MouseEventArgs e)
+    {
+        base.OnMouseClick(e);
+        if (e.Button == MouseButtons.Left && IsArrowPoint(e.Location)) {
+            EventHandler handler = ArrowClicked;
+            if (handler != null) handler(this, EventArgs.Empty);
+        }
     }
 
     public void SetContent(string title, string detail, Color dotColor, string mode)
@@ -630,13 +663,14 @@ public sealed class OverlayPillForm : Form
         using (Bitmap bitmap = CreateSurface()) bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
     }
 
-    protected override void OnShown(EventArgs e) { base.OnShown(e); if (glowMode != "Off") StartAnimation(); UpdateLayer(); }
-    protected override void OnFormClosed(FormClosedEventArgs e) { StopAnimation(); base.OnFormClosed(e); }
+    protected override void OnShown(EventArgs e) { base.OnShown(e); arrowHitTimer.Start(); UpdateArrowInput(); if (glowMode != "Off") StartAnimation(); UpdateLayer(); }
+    protected override void OnFormClosed(FormClosedEventArgs e) { arrowHitTimer.Stop(); StopAnimation(); base.OnFormClosed(e); }
     protected override void Dispose(bool disposing)
     {
         if (disposing)
         {
             animationTimer.Dispose();
+            arrowHitTimer.Dispose();
             if (titleFont != null) titleFont.Dispose();
             if (detailFont != null) detailFont.Dispose();
             if (chevronFont != null) chevronFont.Dispose();
@@ -836,6 +870,8 @@ $script:processingSkipped = 0
 $script:cancelRequested = $false
 $script:currentJob = $null
 $script:lastOutputDirectory = $null
+$script:pendingBatch = $null
+$script:lastBatchReportPath = $null
 $script:isSmokeRun = [bool]($SmokeTest -or $SmokeTestConversion -or $SmokeTestWebUi)
 $script:dataDirectory = if ($script:isSmokeRun) {
     Join-Path ([System.IO.Path]::GetTempPath()) ('PngToJpg_SmokeState_' + [Guid]::NewGuid().ToString('N'))
@@ -1114,6 +1150,9 @@ function Save-AppState {
             SpreadsheetTargetScreen = [int]($script:organizerSpreadsheetScreenIndex + 1)
             DynamicIslandEnabled = [bool]$script:dynamicIslandEnabled
             Records = $records
+            PendingBatch = $script:pendingBatch
+            LastBatchReportPath = $script:lastBatchReportPath
+            LastBatchOutputDirectory = $script:lastOutputDirectory
         }
         $json = $state | ConvertTo-Json -Depth 5
         $tempPath = $script:statePath + '.tmp'
@@ -1982,7 +2021,7 @@ $organizerSpreadsheetScreenCombo.Location = [System.Drawing.Point]::new(962, 132
 $organizerSpreadsheetScreenCombo.Size = [System.Drawing.Size]::new(144, 28)
 $organizerSpreadsheetScreenCombo.Anchor = 'Top,Right'
 $screenNumber = 0
-foreach ($screen in @([System.Windows.Forms.Screen]::AllScreens | Sort-Object DeviceName)) {
+foreach ($screen in @([System.Windows.Forms.Screen]::AllScreens | Sort-Object @{Expression='Primary';Descending=$true},DeviceName)) {
     $screenNumber++
     $screenLabel = if ($screen.Primary) { "第 $screenNumber 个屏幕（主屏）" } else { "第 $screenNumber 个屏幕" }
     [void]$organizerSpreadsheetScreenCombo.Items.Add($screenLabel)
@@ -2071,9 +2110,24 @@ $script:organizerDialogLogList = $organizerLogList
 
 $organizerPathBrowseButton.Add_Click({
     $folderDialog = [System.Windows.Forms.FolderBrowserDialog]::new()
-    $folderDialog.Description = '选择钉钉专用下载目录（请勿选择桌面根目录）'
+    $folderDialog.Description = '选择自动监控的文件夹（请勿选择桌面根目录）'
     $folderDialog.InitialDirectory = $organizerPathBox.Text
-    if ($folderDialog.ShowDialog($form) -eq 'OK') { $organizerPathBox.Text = $folderDialog.SelectedPath }
+    if ($folderDialog.ShowDialog($form) -eq 'OK') {
+        $selectedPath = $folderDialog.SelectedPath
+        if (Test-IsDesktopRootPath -Path $selectedPath -DesktopPath $defaultDesktopPath) {
+            [void][Windows.Forms.MessageBox]::Show('请选专用子文件夹，不要选择桌面根目录。')
+        } elseif ($script:organizerWorkerProcess -or $script:organizerPending.Count -gt 0) {
+            [void][Windows.Forms.MessageBox]::Show('请等待当前整理队列完成后再更换监控目录。')
+        } elseif ($script:organizerEnabled) {
+            [void](Start-DesktopOrganizer -Path $selectedPath)
+            $organizerPathBox.Text = $script:organizerPath
+        } else {
+            $script:organizerPath = $selectedPath
+            $organizerPathBox.Text = $selectedPath
+            Save-AppState
+            Update-DesktopOrganizerUi
+        }
+    }
     $folderDialog.Dispose()
 })
 $organizerStartButton.Add_Click({
@@ -2768,6 +2822,17 @@ function Show-DynamicIsland {
     )
 
     $script:dynamicIslandForm = $island
+    $island.Add_ArrowClicked({
+        if ($form.IsDisposed) { return }
+        if ($form.WindowState -eq 'Minimized') { $form.WindowState = 'Normal' }
+        $form.Show()
+        $form.Activate()
+        if ($script:webHost -and -not $script:webHost.IsDisposed -and $script:webHost.CoreWebView2) {
+            [void]$script:webHost.CoreWebView2.ExecuteScriptAsync("navigatePage('organizer')")
+        } else {
+            Show-DesktopOrganizerDialog
+        }
+    })
     Update-DynamicIslandContent
     $island.Show()
 }
@@ -2843,7 +2908,7 @@ function Update-DesktopOrganizerUi {
             $script:organizerDialogStartButton.BackColor = [System.Drawing.ColorTranslator]::FromHtml('#FBE4E4')
             $script:organizerDialogStartButton.ForeColor = [System.Drawing.ColorTranslator]::FromHtml('#9B2C2C')
             $script:organizerDialogPathBox.ReadOnly = $true
-            $script:organizerDialogBrowseButton.Enabled = $false
+            $script:organizerDialogBrowseButton.Enabled = $true
         } else {
             $script:organizerDialogStatusLabel.Text = '尚未开启监控；桌面其他来源的文件不会被整理'
             $script:organizerDialogStatusLabel.ForeColor = [System.Drawing.ColorTranslator]::FromHtml('#687086')
@@ -3036,7 +3101,7 @@ function Open-SpreadsheetFile {
     $startInfo.UseShellExecute = $true
     [void][System.Diagnostics.Process]::Start($startInfo)
     if ($script:organizerSpreadsheetScreenEnabled) {
-        $screens = @([System.Windows.Forms.Screen]::AllScreens | Sort-Object DeviceName)
+        $screens = @([System.Windows.Forms.Screen]::AllScreens | Sort-Object @{Expression='Primary';Descending=$true},DeviceName)
         if ($screens.Count -gt 0) {
             $screenIndex = [Math]::Max(0, [Math]::Min($script:organizerSpreadsheetScreenIndex, $screens.Count - 1))
             if ($script:spreadsheetWindowMoveJobs.Count -eq 0) { $script:spreadsheetWindowMoveHandles.Clear() }
@@ -3055,15 +3120,25 @@ function Move-PendingSpreadsheetWindows {
         if ($script:spreadsheetWindowMoveTimer) { $script:spreadsheetWindowMoveTimer.Stop() }
         return
     }
-    $screens = @([System.Windows.Forms.Screen]::AllScreens | Sort-Object DeviceName)
+    $screens = @([System.Windows.Forms.Screen]::AllScreens | Sort-Object @{Expression='Primary';Descending=$true},DeviceName)
     for ($index = $script:spreadsheetWindowMoveJobs.Count - 1; $index -ge 0; $index--) {
         $job = $script:spreadsheetWindowMoveJobs[$index]
-        $expired = ([DateTime]::UtcNow - [DateTime]$job.StartedAtUtc).TotalSeconds -ge 10
-        $window = @([SpreadsheetWindowMover]::FindVisibleWindows([string]$job.Title) | Where-Object { -not $script:spreadsheetWindowMoveHandles.Contains($_.ToInt64()) } | Select-Object -First 1)
+        $expired = ([DateTime]::UtcNow - [DateTime]$job.StartedAtUtc).TotalSeconds -ge 30
+        $window = @([SpreadsheetWindowMover]::FindVisibleWindows([string]$job.Title) | Select-Object -First 1)
         $window = if ($window.Count -gt 0) { [IntPtr]$window[0] } else { [IntPtr]::Zero }
         if ($window -ne [IntPtr]::Zero -and $screens.Count -gt 0) {
             $screenIndex = [Math]::Max(0, [Math]::Min([int]$job.ScreenIndex, $screens.Count - 1))
-            if ([SpreadsheetWindowMover]::MoveToWorkingArea($window, $screens[$screenIndex].WorkingArea)) {
+            $targetScreen = $screens[$screenIndex]
+            $onTarget = [Windows.Forms.Screen]::FromHandle($window).DeviceName -eq $targetScreen.DeviceName
+            if (-not $onTarget) {
+                [void][SpreadsheetWindowMover]::MoveToWorkingArea($window, $targetScreen.WorkingArea)
+                $onTarget = [Windows.Forms.Screen]::FromHandle($window).DeviceName -eq $targetScreen.DeviceName
+            }
+            if ($onTarget) {
+                if (-not $job.PSObject.Properties['LocatedAtUtc']) {
+                    $job | Add-Member -NotePropertyName LocatedAtUtc -NotePropertyValue ([DateTime]::UtcNow)
+                }
+                if (([DateTime]::UtcNow - $job.LocatedAtUtc).TotalSeconds -lt 2) { continue }
                 [void]$script:spreadsheetWindowMoveHandles.Add($window.ToInt64())
                 Write-DesktopOrganizerLog "已将表格移到第 $($screenIndex + 1) 个屏幕。"
                 $script:spreadsheetWindowMoveJobs.RemoveAt($index)
@@ -4378,6 +4453,58 @@ function Remove-JobTemporaryDirectory {
     }
 }
 
+function Update-PendingBatchAfterPath {
+    param([string]$Path)
+    if (-not $script:pendingBatch -or [string]::IsNullOrWhiteSpace($Path)) { return }
+    $script:pendingBatch.Paths = @($script:pendingBatch.Paths | Where-Object { [string]$_ -ne $Path })
+    Save-AppState -Immediate
+}
+
+function Write-BatchReport {
+    $reportDirectory = Join-Path $script:dataDirectory 'reports'
+    [IO.Directory]::CreateDirectory($reportDirectory) | Out-Null
+    $reportPath = Join-Path $reportDirectory ("batch-{0}.md" -f (Get-Date -Format 'yyyyMMdd-HHmmss'))
+    $lines = [System.Collections.Generic.List[string]]::new()
+    [void]$lines.Add('# 图片处理批次报告')
+    [void]$lines.Add('')
+    [void]$lines.Add("- 完成时间：$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')")
+    [void]$lines.Add("- 总数：$($script:processingItems.Count)")
+    [void]$lines.Add("- 成功：$($script:processingSuccess)")
+    [void]$lines.Add("- 失败：$($script:processingFailed)")
+    [void]$lines.Add("- 跳过：$($script:processingSkipped)")
+    [void]$lines.Add('')
+    [void]$lines.Add('| 原文件 | 状态 | 输出文件 |')
+    [void]$lines.Add('| --- | --- | --- |')
+    foreach ($item in @($script:processingItems)) {
+        $source = [string]$item.Tag
+        $itemStatus = [string]$item.SubItems[3].Text
+        $output = if ($script:resultPaths.ContainsKey($source)) { [string]$script:resultPaths[$source] } else { '' }
+        $source = $source.Replace('|', '\\|'); $itemStatus = $itemStatus.Replace('|', '\\|'); $output = $output.Replace('|', '\\|')
+        [void]$lines.Add("| $source | $itemStatus | $output |")
+    }
+    [IO.File]::WriteAllLines($reportPath, $lines, [Text.UTF8Encoding]::new($false))
+    return $reportPath
+}
+
+function Open-LastBatchReport {
+    if ([string]::IsNullOrWhiteSpace([string]$script:lastBatchReportPath) -or -not (Test-Path -LiteralPath $script:lastBatchReportPath -PathType Leaf)) { throw '当前没有可打开的批次报告。' }
+    Start-Process -FilePath 'explorer.exe' -ArgumentList "/select,`"$script:lastBatchReportPath`""
+}
+
+function Offer-ResumeInterruptedBatch {
+    if (-not $script:pendingBatch -or @($script:pendingBatch.Paths).Count -eq 0) { return }
+    $valid = @($script:pendingBatch.Paths | Where-Object { Test-Path -LiteralPath ([string]$_) -PathType Leaf })
+    if ($valid.Count -eq 0) { $script:pendingBatch = $null; Save-AppState -Immediate; return }
+    $answer = [Windows.Forms.MessageBox]::Show("检测到上次关闭 APP 时仍有 $($valid.Count) 个文件未完成。`n`n是否继续处理？", '恢复未完成任务', 'YesNo', 'Question')
+    if ($answer -ne [Windows.Forms.DialogResult]::Yes) { $script:pendingBatch = $null; Save-AppState -Immediate; return }
+    foreach ($path in $valid) {
+        $item = $script:allItems | Where-Object { [string]$_.Tag -eq [string]$path } | Select-Object -First 1
+        if ($item) { $item.Checked = $true }
+    }
+    $script:pendingBatch.Paths = $valid
+    $convertButton.PerformClick()
+}
+
 function Complete-ProcessingBatch {
     if ($script:workerTimer) { $script:workerTimer.Stop() }
     $script:isConverting = $false
@@ -4388,7 +4515,9 @@ function Complete-ProcessingBatch {
     } else {
         "处理完成：成功 $($script:processingSuccess)，失败 $($script:processingFailed)，跳过 $($script:processingSkipped)"
     }
-    Save-AppState
+    if (-not $script:cancelRequested) { $script:lastBatchReportPath = Write-BatchReport }
+    $script:pendingBatch = $null
+    Save-AppState -Immediate
     if ($openFolderCheck.Checked -and $script:processingSuccess -gt 0 -and (Test-Path -LiteralPath $script:lastOutputDirectory -PathType Container)) {
         try {
             $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
@@ -4652,6 +4781,7 @@ $script:workerTimer.Add_Tick({
     finally {
         if (-not $script:workerProcess) {
             Remove-JobTemporaryDirectory $jobState.Directory
+            Update-PendingBatchAfterPath ([string]$jobState.Item.Tag)
             $script:currentJob = $null
             $script:processingIndex++
             Start-NextWorkerJob
@@ -4713,6 +4843,8 @@ $convertButton.Add_Click({
     $script:processingSkipped = 0
     $script:cancelRequested = $false
     $script:lastOutputDirectory = $null
+    $script:pendingBatch = [PSCustomObject]@{ StartedAt = [DateTime]::Now.ToString('o'); Paths = @($checkedItems | ForEach-Object { [string]$_.Tag }) }
+    Save-AppState -Immediate
     $script:isConverting = $true
     $progressBar.Value = 0
     Set-ProcessingControlsEnabled $false
@@ -4725,6 +4857,9 @@ function Load-AppState {
     try {
         $state = Get-Content -LiteralPath $script:statePath -Raw -Encoding UTF8 | ConvertFrom-Json
         $savedActivePath = $null
+        if ($state.PSObject.Properties['PendingBatch']) { $script:pendingBatch = $state.PendingBatch }
+        if ($state.PSObject.Properties['LastBatchReportPath']) { $script:lastBatchReportPath = [string]$state.LastBatchReportPath }
+        if ($state.PSObject.Properties['LastBatchOutputDirectory']) { $script:lastOutputDirectory = [string]$state.LastBatchOutputDirectory }
         if ($state.PSObject.Properties['LastActivePath']) {
             $savedActivePath = [string]$state.LastActivePath
         }
@@ -4845,6 +4980,7 @@ $form.Add_Shown({
         Update-DesktopOrganizerUi
     }
     if ($script:dynamicIslandEnabled) { Show-DynamicIsland }
+    Offer-ResumeInterruptedBatch
     Update-CheckedStatus
     if ($script:allItems.Count -eq 0) { $status.Text = Get-LocalEngineStatusText }
     $desired = $contentSplit.Width - 420
@@ -5162,10 +5298,16 @@ if ($SmokeTest) {
             $positionSmokeForm.Show()
             [System.Windows.Forms.Application]::DoEvents()
             $positionSmokeWindow = [SpreadsheetWindowMover]::FindVisibleWindow('表格窗口屏幕定位测试')
-            $positionSmokeScreens = @([System.Windows.Forms.Screen]::AllScreens | Sort-Object DeviceName)
+            $positionSmokeScreens = @([System.Windows.Forms.Screen]::AllScreens | Sort-Object @{Expression='Primary';Descending=$true},DeviceName)
             $positionSmokeScreenIndex = [Math]::Min($organizerSpreadsheetScreenCombo.SelectedIndex, $positionSmokeScreens.Count - 1)
             $script:spreadsheetWindowMoveJobs.Add([PSCustomObject]@{ Title = '表格窗口屏幕定位测试'; ScreenIndex = $positionSmokeScreenIndex; StartedAtUtc = [DateTime]::UtcNow })
             Move-PendingSpreadsheetWindows
+            $positionDeadline = [DateTime]::UtcNow.AddSeconds(4)
+            while ($script:spreadsheetWindowMoveJobs.Count -gt 0 -and [DateTime]::UtcNow -lt $positionDeadline) {
+                [System.Windows.Forms.Application]::DoEvents()
+                Move-PendingSpreadsheetWindows
+                [System.Threading.Thread]::Sleep(50)
+            }
             [System.Windows.Forms.Application]::DoEvents()
             if ($positionSmokeWindow -eq [IntPtr]::Zero -or $script:spreadsheetWindowMoveJobs.Count -ne 0) { throw '表格窗口屏幕定位调用失败。' }
             if ([System.Windows.Forms.Screen]::FromHandle($positionSmokeWindow).DeviceName -ne $positionSmokeScreens[$positionSmokeScreenIndex].DeviceName) {
@@ -5199,8 +5341,8 @@ if ($SmokeTest) {
             [System.Windows.Forms.Application]::DoEvents()
             [System.Threading.Thread]::Sleep(4)
         }
-        if ($script:dynamicIslandForm.TargetFrameInterval -gt 17 -or $script:dynamicIslandForm.AnimationFrameCount -lt 6) {
-            throw "灵动岛高帧率动画验证失败：$($script:dynamicIslandForm.AnimationFrameCount) 帧。"
+        if ($SmokeTestIslandGlowMode -ne 'Monitoring' -and ($script:dynamicIslandForm.TargetFrameInterval -gt 34 -or $script:dynamicIslandForm.AnimationFrameCount -lt 3)) {
+            throw "灵动岛任务动画验证失败：$($script:dynamicIslandForm.AnimationFrameCount) 帧。"
         }
     }
     if (-not $script:dynamicIslandForm -or $script:dynamicIslandForm.IsDisposed -or -not $script:dynamicIslandForm.TopMost) {

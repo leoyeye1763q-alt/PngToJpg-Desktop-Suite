@@ -11,6 +11,27 @@
 
 <!-- BEGIN: Custom Styles -->
 <style data-purpose="base-styling">
+    /* Nav group styles - theme-aware */
+    .nav-group { display: flex; flex-direction: column; }
+    .nav-group-row { display: flex; align-items: center; gap: 2px; position: relative; }
+    .nav-group-header { flex: 1; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: transparent; border: none; cursor: pointer; color: inherit; width: 100%; text-align: left; position: relative; transition: all 0.15s ease; min-width: 0; }
+    .nav-group-header:hover { background: color-mix(in srgb, var(--theme-sidebar-text) 10%, transparent) !important; color: var(--theme-sidebar-text) !important; }
+    .nav-group-header.active { background: color-mix(in srgb, var(--theme-accent) 12%, transparent) !important; }
+    .nav-group-header.active .nav-icon { background: var(--theme-accent) !important; color: var(--theme-on-accent) !important; box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-accent) 30%, transparent) !important; }
+    .nav-group-header .nav-icon { flex-shrink: 0; }
+    .nav-group-header .truncate { flex: 1; min-width: 0; }
+    .nav-arrow-btn { flex-shrink: 0; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; background: transparent; border: none; cursor: pointer; color: color-mix(in srgb, var(--theme-sidebar-text) 40%, transparent); border-radius: 6px; padding: 0; transition: all 0.15s ease; }
+    .nav-arrow-btn:hover { background: color-mix(in srgb, var(--theme-sidebar-text) 8%, transparent); color: var(--theme-sidebar-text); }
+    .nav-arrow-btn .nav-arrow { width: 14px; height: 14px; transition: transform 0.2s ease; }
+    .nav-group.expanded .nav-arrow-btn .nav-arrow { transform: rotate(90deg); }
+    .nav-submenu { overflow: hidden; max-height: 0; opacity: 0; transition: max-height 0.15s ease, opacity 0.15s ease; }
+    .nav-group.expanded .nav-submenu { max-height: 50px; opacity: 1; }
+    .nav-subitem { display: flex; align-items: center; gap: 8px; padding: 7px 12px 7px 12px; border-radius: 10px; background: transparent; border: none; cursor: pointer; color: color-mix(in srgb, var(--theme-sidebar-text) 60%, transparent); width: 100%; text-align: left; font-size: 13px; transition: all 0.15s ease; margin-left: 0; }
+    .nav-subitem:hover { background: color-mix(in srgb, var(--theme-sidebar-text) 8%, transparent); color: var(--theme-sidebar-text); }
+    .nav-subitem.active { background: color-mix(in srgb, var(--theme-accent) 12%, transparent) !important; color: var(--theme-accent) !important; }
+    .nav-subitem.active svg { stroke: var(--theme-accent); }
+    .nav-subitem svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.7; }
+    .nav-subitem.active svg { opacity: 1; }
     body {
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
@@ -33,7 +54,7 @@
     }
   </style>
 <!-- END: Custom Styles -->
-<link rel="stylesheet" href="conversion.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css"><script src="theme.js"></script><script defer="" src="app.js"></script></head>
+<link rel="stylesheet" href="conversion.css"><link rel="stylesheet" href="local.css"><link rel="stylesheet" href="theme.css?v=3.0.16-r34"><script src="theme.js?v=3.0.16-r34"></script><script defer="" src="app.js?v=3.0.16-r34"></script></head>
 <body class="desktop-body" style="" data-page="conversion">
 <!-- BEGIN: Floating Outer Shell -->
 <div id="window-bar"><span class="window-drag"><img class="titlebar-logo" src="assets/app-icon.ico" alt=""><span>蟑螂强</span></span><button data-action="minimize" title="最小化">−</button><button data-action="maximize" title="最大化">□</button><button data-action="close" title="关闭">×</button></div><div class="w-full h-full flex gap-5 items-stretch overflow-hidden" id="desktop-shell">
@@ -45,13 +66,15 @@
 <img class="brand-companion" src="assets/brand-companion.jpg" alt="蟑螂强副图">
 <div>
 <h2 class="text-sm font-bold tracking-tight text-white leading-tight">蟑螂强</h2>
-<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.9</p>
+<p class="text-[11px] text-zinc-400 font-medium">Desktop Suite v3.0.16</p>
 </div>
 </div>
 <!-- Unified 6-item Navigation -->
 <nav aria-label="侧边主导航" class="space-y-1.5 pt-2">
-<!-- 1. 格式与尺寸转换 -->
-<button class="nav-item" title="格式与尺寸转换" data-action="conversion" aria-current="page">
+<!-- 1. 格式与尺寸转换（带展开箭头） -->
+<div class="nav-group" id="conversionNavGroup">
+<div class="nav-group-row">
+<button class="nav-item nav-group-header" title="格式与尺寸转换" data-action="conversion" aria-current="page">
 <div class="nav-icon">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
 <rect height="18" rx="2" stroke-linecap="round" stroke-linejoin="round" width="18" x="3" y="3"></rect>
@@ -61,6 +84,14 @@
 </div>
 <span class="truncate">格式与尺寸转换</span>
 </button>
+<button class="nav-arrow-btn" id="conversionArrowBtn" title="展开/折叠子菜单" type="button">
+<svg class="nav-arrow" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+</button>
+</div>
+<div class="nav-submenu" id="conversionSubmenu">
+<button class="nav-subitem file-converter-subitem" title="格式转换大全（文件转换器）" data-action="fileConverter"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M5 4h8l4 4v5M19 20h-8l-4-4V9" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 10h7l-2-2m2 2-2 2M16 14H9l2-2m-2 2 2 2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>格式转换大全</span></button>
+</div>
+</div>
 <!-- 2. 图片清晰度增强 -->
 <button class="nav-item" title="图片清晰度增强" data-action="clarity">
 <div class="nav-icon">
@@ -91,15 +122,6 @@
 </button>
 <button class="nav-item" title="本地 Photoshop 助手" data-action="photoshop"><div class="nav-icon"><svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="4"></rect><path d="M8 16V8h3.2a2.6 2.6 0 010 5.2H8M15 11.2c.6-.5 2.3-.5 2.7.3.5 1-2.8.8-2.7 2.5.1 1.2 2.1 1.2 2.9.5"></path></svg></div><span class="truncate">Photoshop 助手</span></button>
 <!-- 5. 更新日志与版本 -->
-<button class="nav-item" title="更新日志与版本" data-action="changelog">
-<div class="nav-icon">
-<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
-</svg>
-</div>
-<span class="truncate">更新日志与版本</span>
-</button>
-<!-- 6. 偏好设置 -->
 <button class="nav-item" title="偏好设置" data-action="settings">
 <div class="nav-icon">
 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -109,10 +131,19 @@
 </div>
 <span class="truncate">偏好设置</span>
 </button>
+<!-- 6. 偏好设置 -->
+<button class="nav-item" title="更新日志与版本" data-action="changelog">
+<div class="nav-icon">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="truncate">更新日志与版本</span>
+</button>
 </nav>
 </div>
 <!-- 底部守护服务状态小卡片 -->
-<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.9</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
+<div class="relative overflow-hidden bg-white/[0.06] border border-white/[0.08] rounded-[24px] p-4 text-left"><div class="sidebar-status" id="service-status">正在读取状态…</div><p class="sidebar-note">本地处理 · 独立后台队列</p><div class="sidebar-meta"><span>v3.0.16</span><button data-action="organizer" class="coral-pill">查看任务</button></div></div>
 </aside>
 <!-- END: Left Sidebar Capsule -->
 <!-- BEGIN: Main White Content Card -->
@@ -124,7 +155,7 @@
 <div class="flex items-center space-x-2">
 <span class="text-xs font-semibold text-slate-400">蟑螂强</span>
 <span class="text-slate-300 text-xs">/</span>
-<h1 class="text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight">格式与尺寸转换 <span class="text-xs font-mono font-semibold text-slate-400 ml-1">v3.0.9</span></h1>
+<h1 class="text-xl lg:text-2xl font-extrabold text-slate-900 tracking-tight">格式与尺寸转换 <span class="text-xs font-mono font-semibold text-slate-400 ml-1">v3.0.16</span></h1>
 
 </div>
 <p class="text-xs text-slate-400 mt-0.5 font-medium">支持图片、PDF、Word、PPT 互转 · 文档按页离线处理</p>
@@ -142,7 +173,7 @@
 <div class="flex items-center space-x-2 flex-wrap gap-y-2">
 <button class="inline-flex items-center px-4 py-2 bg-[#ff5e36] hover:bg-[#ff4b1f] text-white rounded-full text-xs font-semibold shadow-coral transition space-x-1.5 active:scale-95" data-action="add">
 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-<span class="">+ 添加文件</span>
+<span class="">添加文件</span>
 </button>
 <button class="inline-flex items-center px-3.5 py-2 bg-slate-100/80 hover:bg-slate-200/70 text-slate-700 rounded-full text-xs font-medium transition active:scale-95" data-action="clear">
 <svg class="w-3.5 h-3.5 mr-1 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -321,8 +352,11 @@
 <button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-full text-xs font-semibold transition shadow-pill active:scale-95" data-action="cancel">
             取消处理
           </button>
-<!-- Main Launch Coral CTA -->
-<button class="inline-flex items-center px-6 py-2 bg-[#ff5e36] hover:bg-[#ff4b1f] text-white rounded-full text-xs font-bold shadow-coral transition active:scale-95 space-x-2" data-action="start">
+ <!-- Main Launch Coral CTA -->
+ <button class="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-full text-xs font-semibold transition shadow-pill active:scale-95" data-action="openBatchReport" disabled>
+             打开批次报告
+           </button>
+ <button class="inline-flex items-center px-6 py-2 bg-[#ff5e36] hover:bg-[#ff4b1f] text-white rounded-full text-xs font-bold shadow-coral transition active:scale-95 space-x-2" data-action="start">
 <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
 <path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
 <path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" fill-rule="evenodd"></path>
@@ -339,7 +373,29 @@
 <!-- END: Floating Outer Shell -->
 
 
-<div id="toast" role="status"></div></body></html>
+<div id="toast" role="status"></div>
+<dialog id="batch-report-dialog">
+  <h2>批次报告</h2>
+  <p id="batch-report-path" class="text-slate-400 text-xs"></p>
+  <pre id="batch-report-content" style="max-height:55vh;overflow:auto;white-space:pre-wrap;background:#f8fafc;border:1px solid #e2e8f0;border-radius:16px;padding:16px;font-size:12px;line-height:1.7;user-select:text"></pre>
+  <div class="dialog-actions">
+    <button data-action="openBatchReportFolder" class="primary">打开输出文件夹</button>
+    <button data-action="closeBatchReport">关闭</button>
+  </div>
+</dialog>
+</body></html>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
